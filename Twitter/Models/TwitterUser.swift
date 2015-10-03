@@ -21,10 +21,17 @@ class TwitterUser: NSObject, NSCoding {
 
     var name: String?
     var screenName: String?
+    var stylizedScreenName: String? {
+        if let sName = screenName {
+            return "@\(sName)"
+        }
+        return nil
+    }
+
     var profileSmallImageUrl: NSURL?
     var profileRegularImageUrl: NSURL? {
         var profileSmallImgUrlString = profileSmallImageUrl?.absoluteString ?? ""
-        let range = profileSmallImgUrlString.rangeOfString(".*_normal", options: .RegularExpressionSearch)
+        let range = profileSmallImgUrlString.rangeOfString("_normal", options: .LiteralSearch)
         if let range = range {
             profileSmallImgUrlString = profileSmallImgUrlString.stringByReplacingCharactersInRange(range, withString: "_bigger")
         }

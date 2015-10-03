@@ -39,8 +39,10 @@ class TwitterLoginViewController: UIViewController {
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         // Get the new view controller using segue.destinationViewController.
         // Pass the selected object to the new view controller.
-        if let homeTimelineVC = segue.destinationViewController as? HomeTimelineViewController {
-            homeTimelineVC.currentUser = currentUser
+        if let homeTimelineNavVC = segue.destinationViewController as? UINavigationController {
+            if let homeTimelineVC = homeTimelineNavVC.topViewController as? HomeTimelineViewController {
+                homeTimelineVC.currentUser = currentUser
+            }
         }
     }
 

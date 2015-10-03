@@ -10,7 +10,8 @@ import UIKit
 import BDBOAuth1Manager
 
 typealias SuccessCompletionBlock = (Bool, NSError?) -> ()
-typealias DataCompletionBlock = (NSDictionary?, NSError?) -> ()
+typealias DictionaryDataCompletionBlock = (NSDictionary?, NSError?) -> ()
+typealias ArrayDataCompletionBlock = ([NSDictionary]?, NSError?) -> ()
 
 class TwitterClient: BDBOAuth1RequestOperationManager {
 
@@ -44,6 +45,12 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
             static let NotificationsCount = "notifications"
             static let CreatedAt = "created_at"
         }
+
+        struct Tweet {
+            static let Text = "text"
+            static let User = "user"
+            static let CreatedAt = "created_at"
+        }
     }
 
     struct APIScheme {
@@ -51,6 +58,7 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
         static let OAuthRequestTokenEndpoint = "oauth/request_token"
         static let OAuthAccessTokenEndpoint = "oauth/access_token"
         static let UserCredentialEndpoint = "1.1/account/verify_credentials.json"
+        static let HomeTimelineEndpoint = "1.1/statuses/home_timeline.json"
     }
 
     static let SharedInstance = TwitterClient(baseURL: APIScheme.BaseUrl, consumerKey: APICredentials.Info.Key, consumerSecret: APICredentials.Info.Secret)
@@ -85,7 +93,7 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
         }
     }
 
-    static func fetchUserCredentialsWithCompletion(completion: DataCompletionBlock?) {
+    static func fetchUserCredentialsWithCompletion(completion: DictionaryDataCompletionBlock?) {
 
         TwitterClient.SharedInstance.GET(APIScheme.UserCredentialEndpoint, parameters: nil, success: { (operation: AFHTTPRequestOperation!, response: AnyObject!) -> Void in
                 let userCredentialsDictionary =  response as? NSDictionary
@@ -94,5 +102,13 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
                 completion?(nil, error)
         }
     }
-    
+
+    static func fetchUserTweetsWithCompletion(completion: ArrayDataCompletionBlock?) {
+        TwitterClient.SharedInstance.GET(APIScheme.HomeTimelineEndpoint, parameters: nil, success: { (operation: AFHTTPRequestOperation!, response: AnyObject!) -> Void in
+            let userTweets =  response as? [NSDictionary]
+            completion?(userTweets, nil)
+            }) { (operation: AFHTTPRequestOperation!, error: NSError!) -> Void in
+                completion?(nil, error)
+        }
+    }
 }

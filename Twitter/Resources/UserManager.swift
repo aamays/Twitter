@@ -14,6 +14,7 @@ class UserManager: NSObject {
         didSet {
             if let currentUser = CurrentUser {
                 TwitterUser.archiveUser(currentUser)
+                NSNotificationCenter.defaultCenter().postNotificationName(AppConstants.UserDidLoginNotification, object: nil)
             } else {
                 // User is set to nil
                 // remove user data from persistence
@@ -42,5 +43,9 @@ class UserManager: NSObject {
                 completion?(nil, error)
             }
         }
+    }
+
+    class func logoutCurrentUser() {
+        CurrentUser = nil
     }
 }

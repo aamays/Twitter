@@ -30,9 +30,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if let archivedUser = TwitterUser.getUserFromArchive() {
             UserManager.CurrentUser = archivedUser
             // directly go to the home time line
-            if let homeTimelineVC = storyboard.instantiateViewControllerWithIdentifier(AppConstants.MainStoryboard.HomeTimelineVCIdentifier) as? HomeTimelineViewController {
-                homeTimelineVC.currentUser = archivedUser
-                window?.rootViewController = homeTimelineVC
+            if let homeTimelineNavVC = storyboard.instantiateViewControllerWithIdentifier(AppConstants.MainStoryboard.HomeTimelineNavVCIdentifier) as? UINavigationController {
+                if let homeTimelineVC = homeTimelineNavVC.topViewController as? HomeTimelineViewController {
+                    homeTimelineVC.currentUser = archivedUser
+                }
+                window?.rootViewController = homeTimelineNavVC
             }
         }
 

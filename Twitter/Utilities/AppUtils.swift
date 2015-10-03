@@ -7,7 +7,7 @@
 //
 
 import Foundation
-
+import UIKit
 
 struct AppUtils {
 
@@ -18,5 +18,10 @@ struct AppUtils {
 
     static func getUserInfoArchiveFilePath() -> String {
         return "\(AppUtils.getUserDirectory())/\(AppConstants.UserInfoArchiveFilename)"
+    }
+
+    static func updateTextAndTintColorForNavBar(navController: UINavigationController, tintColor: UIColor?, textColor: UIColor?) {
+        navController.navigationBar.barTintColor = tintColor ?? AppConstants.TwitterBlueColor
+        navController.navigationBar.titleTextAttributes = [NSForegroundColorAttributeName: textColor ?? AppConstants.ApplicationBarTintColor]
     }
 }

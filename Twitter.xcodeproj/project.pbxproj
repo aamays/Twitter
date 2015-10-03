@@ -17,6 +17,10 @@
 		AC9FA73F1BBD05D2003F0F91 /* HomeTimelineViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC9FA73E1BBD05D2003F0F91 /* HomeTimelineViewController.swift */; settings = {ASSET_TAGS = (); }; };
 		AC9FA7411BBD8D39003F0F91 /* DateUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC9FA7401BBD8D39003F0F91 /* DateUtils.swift */; settings = {ASSET_TAGS = (); }; };
 		AC9FA7451BBED558003F0F91 /* AppUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC9FA7441BBED558003F0F91 /* AppUtils.swift */; settings = {ASSET_TAGS = (); }; };
+		AC9FA7471BBF8A9C003F0F91 /* tfontastic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = AC9FA7461BBF8A9C003F0F91 /* tfontastic.ttf */; settings = {ASSET_TAGS = (); }; };
+		AC9FA74A1BBF8FCA003F0F91 /* TweetsTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC9FA7491BBF8FCA003F0F91 /* TweetsTableViewCell.swift */; settings = {ASSET_TAGS = (); }; };
+		AC9FA74C1BBF97BB003F0F91 /* Tweets.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC9FA74B1BBF97BB003F0F91 /* Tweets.swift */; settings = {ASSET_TAGS = (); }; };
+		AC9FA74E1BBF9B7F003F0F91 /* TweetsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC9FA74D1BBF9B7F003F0F91 /* TweetsManager.swift */; settings = {ASSET_TAGS = (); }; };
 		ACF1BB0D1BBBAD51001309CF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACF1BB0C1BBBAD51001309CF /* AppDelegate.swift */; };
 		ACF1BB121BBBAD51001309CF /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = ACF1BB101BBBAD51001309CF /* Main.storyboard */; };
 		ACF1BB141BBBAD51001309CF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = ACF1BB131BBBAD51001309CF /* Assets.xcassets */; };
@@ -36,6 +40,10 @@
 		AC9FA73E1BBD05D2003F0F91 /* HomeTimelineViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = HomeTimelineViewController.swift; path = ViewControllers/HomeTimelineViewController.swift; sourceTree = "<group>"; };
 		AC9FA7401BBD8D39003F0F91 /* DateUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DateUtils.swift; path = Utilities/DateUtils.swift; sourceTree = "<group>"; };
 		AC9FA7441BBED558003F0F91 /* AppUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AppUtils.swift; path = Utilities/AppUtils.swift; sourceTree = "<group>"; };
+		AC9FA7461BBF8A9C003F0F91 /* tfontastic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = tfontastic.ttf; sourceTree = "<group>"; };
+		AC9FA7491BBF8FCA003F0F91 /* TweetsTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TweetsTableViewCell.swift; path = Views/TweetsTableViewCell.swift; sourceTree = "<group>"; };
+		AC9FA74B1BBF97BB003F0F91 /* Tweets.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Tweets.swift; path = Models/Tweets.swift; sourceTree = "<group>"; };
+		AC9FA74D1BBF9B7F003F0F91 /* TweetsManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TweetsManager.swift; path = Resources/TweetsManager.swift; sourceTree = "<group>"; };
 		ACF1BB091BBBAD51001309CF /* Twitter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Twitter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		ACF1BB0C1BBBAD51001309CF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		ACF1BB111BBBAD51001309CF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -76,6 +84,7 @@
 		AC9FA6CD1BBBAF94003F0F91 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				AC9FA7461BBF8A9C003F0F91 /* tfontastic.ttf */,
 				ACF1BB181BBBAD51001309CF /* Info.plist */,
 				ACF1BB131BBBAD51001309CF /* Assets.xcassets */,
 				ACF1BB151BBBAD51001309CF /* LaunchScreen.storyboard */,
@@ -107,6 +116,7 @@
 			isa = PBXGroup;
 			children = (
 				AC9FA7131BBC3DCA003F0F91 /* TwitterUser.swift */,
+				AC9FA74B1BBF97BB003F0F91 /* Tweets.swift */,
 			);
 			name = Models;
 			sourceTree = "<group>";
@@ -115,8 +125,17 @@
 			isa = PBXGroup;
 			children = (
 				AC9FA73B1BBD04A8003F0F91 /* UserManager.swift */,
+				AC9FA74D1BBF9B7F003F0F91 /* TweetsManager.swift */,
 			);
 			name = Resources;
+			sourceTree = "<group>";
+		};
+		AC9FA7481BBF8F9B003F0F91 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				AC9FA7491BBF8FCA003F0F91 /* TweetsTableViewCell.swift */,
+			);
+			name = Views;
 			sourceTree = "<group>";
 		};
 		ACF1BB001BBBAD51001309CF = {
@@ -142,6 +161,7 @@
 			children = (
 				ACF1BB0C1BBBAD51001309CF /* AppDelegate.swift */,
 				ACF1BB101BBBAD51001309CF /* Main.storyboard */,
+				AC9FA7481BBF8F9B003F0F91 /* Views */,
 				AC9FA7121BBC3D9D003F0F91 /* Models */,
 				AC9FA6D21BBBB0B1003F0F91 /* ViewControllers */,
 				AC9FA6CA1BBBADE8003F0F91 /* API */,
@@ -223,6 +243,7 @@
 			files = (
 				ACF1BB171BBBAD51001309CF /* LaunchScreen.storyboard in Resources */,
 				AC9FA6CF1BBBAFE1003F0F91 /* CredentialsInfo.plist in Resources */,
+				AC9FA7471BBF8A9C003F0F91 /* tfontastic.ttf in Resources */,
 				ACF1BB141BBBAD51001309CF /* Assets.xcassets in Resources */,
 				ACF1BB121BBBAD51001309CF /* Main.storyboard in Resources */,
 			);
@@ -286,8 +307,11 @@
 				AC9FA7451BBED558003F0F91 /* AppUtils.swift in Sources */,
 				AC9FA73C1BBD04A8003F0F91 /* UserManager.swift in Sources */,
 				AC9FA7411BBD8D39003F0F91 /* DateUtils.swift in Sources */,
+				AC9FA74A1BBF8FCA003F0F91 /* TweetsTableViewCell.swift in Sources */,
 				AC9FA6CC1BBBAE03003F0F91 /* TwitterClient.swift in Sources */,
+				AC9FA74E1BBF9B7F003F0F91 /* TweetsManager.swift in Sources */,
 				AC9FA6D11BBBB02E003F0F91 /* TwitterLoginViewController.swift in Sources */,
+				AC9FA74C1BBF97BB003F0F91 /* Tweets.swift in Sources */,
 				AC9FA73F1BBD05D2003F0F91 /* HomeTimelineViewController.swift in Sources */,
 				ACF1BB0D1BBBAD51001309CF /* AppDelegate.swift in Sources */,
 				AC9FA7141BBC3DCA003F0F91 /* TwitterUser.swift in Sources */,
