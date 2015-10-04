@@ -8,6 +8,7 @@
 
 import UIKit
 import BDBOAuth1Manager
+import CoreLocation
 
 typealias SuccessCompletionBlock = (Bool, NSError?) -> ()
 typealias DictionaryDataCompletionBlock = (NSDictionary?, NSError?) -> ()
@@ -72,6 +73,8 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
 
     struct APIScheme {
         static let BaseUrl = NSURL(string: "https://api.twitter.com")
+        static let UploadUrl = NSURL(string: "https://upload.twitter.com")
+
         static let OAuthRequestTokenEndpoint = "oauth/request_token"
         static let OAuthAccessTokenEndpoint = "oauth/access_token"
         static let UserCredentialEndpoint = "1.1/account/verify_credentials.json"
@@ -81,9 +84,11 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
         static let DestroyStatusEndpoint = "1.1/statuses/destroy/:id.json"
         static let FavoriteCreateEndpoint = "1.1/favorites/create.json"
         static let FavoriteDestroyEndpoint = "1.1/favorites/destroy.json"
+        static let MediaUploadEndpoint = "1.1/media/upload.json"
     }
 
     static let SharedInstance = TwitterClient(baseURL: APIScheme.BaseUrl, consumerKey: APICredentials.Info.Key, consumerSecret: APICredentials.Info.Secret)
+    static let ShareUploadInstace = TwitterClient(baseURL: APIScheme.UploadUrl, consumerKey: APICredentials.Info.Key, consumerSecret: APICredentials.Info.Secret)
 
     var loginCompletition: ((Bool, NSError?) -> Void)?
 
@@ -93,6 +98,7 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
 
         // clean up old access token
         TwitterClient.SharedInstance.requestSerializer.removeAccessToken()
+        TwitterClient.ShareUploadInstace.requestSerializer.removeAccessToken()
 
         // Get a new token
         SharedInstance.fetchRequestTokenWithPath(APIScheme.OAuthRequestTokenEndpoint, method: "GET", callbackURL: AppConstants.OAuthCallbackUrl, scope: nil, success: { (authCredential: BDBOAuth1Credential!) -> Void in
@@ -107,6 +113,7 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
     static func updateAccessTokenFromUrlQuery(query: String) {
         SharedInstance.fetchAccessTokenWithPath(APIScheme.OAuthAccessTokenEndpoint, method: "POST", requestToken: BDBOAuth1Credential(queryString: query), success: { (accessCredential: BDBOAuth1Credential!) -> Void in
                 TwitterClient.SharedInstance.requestSerializer.saveAccessToken(accessCredential)
+                TwitterClient.ShareUploadInstace.requestSerializer.saveAccessToken(accessCredential)
                 // Call the completion block with user here
                 TwitterClient.SharedInstance.loginCompletition?(true, nil)
             }) { (error) -> Void in
@@ -138,11 +145,12 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
     static func updateTweetStatusWitId(id: Int, status: Bool, WithCompletion completion: DictionaryDataCompletionBlock?) {
         var useEndpoint = status ? APIScheme.RetweetStatusEndpoint : APIScheme.DestroyStatusEndpoint
         useEndpoint = replaceIdInTwitterEndpointString(useEndpoint, id: id)
-        print(useEndpoint)
+
         TwitterClient.SharedInstance.POST(useEndpoint, parameters: nil, success: { (operation: AFHTTPRequestOperation!, response: AnyObject!) -> Void in
             let retweetResponse =  response as? NSDictionary
             completion?(retweetResponse, nil)
             }) { (operation: AFHTTPRequestOperation!, error: NSError!) -> Void in
+                print(error.localizedDescription)
                 completion?(nil, error)
         }
     }
@@ -165,14 +173,46 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
         }
     }
 
-    static func updateStatus(status: String, inResponseToStatusId replyStatusId: Int?, withCompletion completion: DictionaryDataCompletionBlock?) {
+    static func updateStatus(status: String, inResponseToStatusId replyStatusId: Int?, andLocation location: CLLocation?, withCompletion completion: DictionaryDataCompletionBlock?) {
         let parameters = NSMutableDictionary()
         parameters["status"] = status
         if let replyStatusId = replyStatusId {
             parameters["in_reply_to_status_id"] = replyStatusId
         }
 
+        if let currLocation = location {
+            parameters["lat"] = currLocation.coordinate.latitude
+            parameters["long"] = currLocation.coordinate.longitude
+            parameters["display_coordinates"] = true
+        }
+
         TwitterClient.SharedInstance.POST(APIScheme.UpdateStatusEndpoint, parameters: parameters, success: { (operation: AFHTTPRequestOperation!, response: AnyObject!) -> Void in
+            let retweetResponse =  response as? NSDictionary
+
+            completion?(retweetResponse, nil)
+            }) { (operation: AFHTTPRequestOperation!, error: NSError!) -> Void in
+                print(error.localizedDescription)
+                completion?(nil, error)
+        }
+    }
+
+    static func uploadMedia(media: NSData, withCompletion completion: DictionaryDataCompletionBlock?) {
+        TwitterClient.ShareUploadInstace.POST(APIScheme.MediaUploadEndpoint, parameters: nil, constructingBodyWithBlock: { (data: AFMultipartFormData!) -> Void in
+            data.appendPartWithFormData(media, name: "media")
+//            data.
+            }, success: { (operation: AFHTTPRequestOperation!, response: AnyObject!) -> Void in
+            let uploadResponse =  response as? NSDictionary
+            print(uploadResponse)
+            completion?(uploadResponse, nil)
+            }) { (operation: AFHTTPRequestOperation!, error: NSError!) -> Void in
+                print(error.localizedDescription)
+                completion?(nil, error)
+        }
+    }
+
+    static func deleteStatusWithId(id: Int, withCompletion completion: DictionaryDataCompletionBlock?) {
+        let destroyWithIdEndpoint = replaceIdInTwitterEndpointString(APIScheme.DestroyStatusEndpoint, id: id)
+        TwitterClient.SharedInstance.POST(destroyWithIdEndpoint, parameters: nil, success: { (operation: AFHTTPRequestOperation!, response: AnyObject!) -> Void in
             let retweetResponse =  response as? NSDictionary
             completion?(retweetResponse, nil)
             }) { (operation: AFHTTPRequestOperation!, error: NSError!) -> Void in

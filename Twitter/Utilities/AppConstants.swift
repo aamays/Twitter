@@ -33,6 +33,9 @@ struct AppConstants {
     struct Colors {
         static let Green = UIColor(red: 34/255, green: 139/255, blue: 34/255, alpha: 1)
         static let FavoriteYellow = UIColor(red: 255/255, green: 180/255, blue: 30/255, alpha: 1)
+        static let TwitterBlueColor = UIColor(red: 85/255, green: 172/255, blue: 238/255, alpha: 1)
+        static let LocationActivePinColor = UIColor(red: 228/255, green: 48/255, blue: 26/255, alpha: 1)
+        static let MediaActiveIconColor = UIColor(red: 128/255, green: 64/255, blue: 23/255, alpha: 1)
     }
 }
 
@@ -44,9 +47,16 @@ struct FontasticIcons {
         case StarEmpty = "c"
         case Reply = "d"
         case Retweet = "e"
+        case LocationMark = "f"
         case Cross = "g"
         case Check = "h"
+        case Trash = "i"
+        case Camera = "j"
+        case LocationPin = "k"
+        case ShortDownArrow = "l"
     }
 }
 
-typealias FontasticIconType = FontasticIcons.Map
+enum TweetDetailsViewCell: String {
+    case TweetAndOwnerViewCell
+}

@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreLocation
 
 class UserManager: NSObject {
 
@@ -45,12 +46,32 @@ class UserManager: NSObject {
         }
     }
 
-    class func updateUserStatus(status: String, inResponseToStatusId statusId: Int?, withCompletion completion: (Bool, NSError?) -> ()) {
-        TwitterClient.updateStatus(status, inResponseToStatusId: statusId) { (responseData: NSDictionary?, error: NSError?) -> () in
-            if error == nil {
+    class func updateUserStatus(status: String, inResponseToStatusId statusId: Int?, andLocation location: CLLocation?, withCompletion completion: (Tweets?, NSError?) -> ()) {
+        TwitterClient.updateStatus(status, inResponseToStatusId: statusId, andLocation: location) { (responseData: NSDictionary?, error: NSError?) -> () in
+            if let data =  responseData {
+                completion(Tweets(dictionary: data), nil)
+            } else {
+                completion(nil, error)
+            }
+        }
+    }
+
+    class func deleteStatusWithId(id: Int, withCompletion completion: (Bool, NSError?) -> ()) {
+        TwitterClient.deleteStatusWithId(id) { (responseData: NSDictionary?, error: NSError?) -> () in
+            if let _ =  responseData {
                 completion(true, nil)
             } else {
                 completion(false, error)
+            }
+        }
+    }
+
+    class func uploadMedia(media: NSData, withCompletion completion: (NSDictionary?, NSError?) -> ()) {
+        TwitterClient.uploadMedia(media) { (responseData: NSDictionary?, error: NSError?) -> () in
+            if let data =  responseData {
+                completion(data, nil)
+            } else {
+                completion(nil, error)
             }
         }
     }

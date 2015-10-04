@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+typealias FontasticIconType = FontasticIcons.Map
 
 struct AppUtils {
 
@@ -25,13 +26,13 @@ struct AppUtils {
         navController.navigationBar.titleTextAttributes = [NSForegroundColorAttributeName: textColor ?? AppConstants.ApplicationBarTintColor]
     }
 
-    static func getAttributedStringForActionButtons(message: String, iconText: String, iconTextColor: UIColor = UIColor.darkGrayColor(), withIconSize size: CGFloat = 15, andBaseLine baseline: CGFloat = -3) -> NSAttributedString {
+    static func getAttributedStringForActionButtons(message: String, icon: FontasticIconType, iconTextColor: UIColor = UIColor.darkGrayColor(), withIconSize size: CGFloat = 15, andBaseLine baseline: CGFloat = -3) -> NSAttributedString {
         let attributedString = NSMutableAttributedString()
         if let font = UIFont(name: FontasticIcons.FontName, size: size) {
             let attrs = [NSFontAttributeName : font,
                 NSBaselineOffsetAttributeName: baseline,
                 NSForegroundColorAttributeName: iconTextColor]
-            let cautionSign = NSMutableAttributedString(string: iconText, attributes: attrs)
+            let cautionSign = NSMutableAttributedString(string: icon.rawValue, attributes: attrs)
             attributedString.appendAttributedString(cautionSign)
             message.characters.count > 0 ? attributedString.appendAttributedString(NSAttributedString(string: " ")) : ()
         }
@@ -48,5 +49,11 @@ struct AppUtils {
         animation.fromValue = NSValue(CGPoint: CGPointMake(targetView.center.x - offset, targetView.center.y))
         animation.toValue = NSValue(CGPoint: CGPointMake(targetView.center.x + offset, targetView.center.y))
         targetView.layer.addAnimation(animation, forKey: "position")
+    }
+}
+
+extension UIImage {
+    var aspectRatio: CGFloat {
+        return size.height != 0 ? size.width / size.height : 0
     }
 }

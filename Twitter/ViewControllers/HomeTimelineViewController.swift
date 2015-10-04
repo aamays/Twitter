@@ -9,7 +9,7 @@
 import UIKit
 import BDBOAuth1Manager
 
-class HomeTimelineViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, TweetsTableViewCellDelegate {
+class HomeTimelineViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, TweetsTableViewCellDelegate, TweetComposerViewControllerDelegate {
 
     // MARK: - Properties
     // MARK: Outlets
@@ -95,8 +95,25 @@ class HomeTimelineViewController: UIViewController, UITableViewDelegate, UITable
             }
         }
     }
+
+    func tweetCellDeleteStatus(cell: TweetsTableViewCell, withId id: Int) {
+        let indexPath = homeTimelineTableView.indexPathForCell(cell)
+        if let tweet = currentUserTweets?[indexPath!.row] {
+            currentUserTweets?.removeAtIndex(indexPath!.row)
+            homeTimelineTableView.reloadRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Fade)
+            UserManager.deleteStatusWithId(tweet.id!) { (success, error) -> () in
+                // @todo: handle error cases here
+            }
+        }
+    }
+    // MARK: - TweetComposerVCDelegate methods
+    func tweetComposerViewController(sender: UIViewController, didPostNewTweet tweet: Tweets) {
+        currentUserTweets?.insert(tweet, atIndex: 0)
+        homeTimelineTableView.reloadRowsAtIndexPaths([NSIndexPath(forRow: 0, inSection: 0)], withRowAnimation: UITableViewRowAnimation.Fade)
+    }
+
     // MARK: - View Actions
-    @IBAction func logoutButtonItemTapped(sender: UIBarButtonItem) {
+    @IBAction func logoutButtonTapped(sender: UIButton) {
         UserManager.logoutCurrentUser()
     }
 
@@ -157,7 +174,11 @@ class HomeTimelineViewController: UIViewController, UITableViewDelegate, UITable
                 if let tag = sender?.tag {
                     navVC.tweet = currentUserTweets?[tag]
                 }
+                navVC.composingNewTweet = false
+            } else if segue.identifier == AppConstants.MainStoryboard.ComposeNewStatusSegueIndentifier {
+                navVC.composingNewTweet = true
             }
+            navVC.delegate = self
         }
     }
 

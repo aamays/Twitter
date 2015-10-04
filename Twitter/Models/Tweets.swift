@@ -78,6 +78,7 @@ class Tweets: NSObject {
 
     func updateRetweetId() {
         // @todo: somehow updated the retweet id
+        retweetId = id
     }
 
     // MARK: - Class type methods

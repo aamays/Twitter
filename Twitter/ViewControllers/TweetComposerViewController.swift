@@ -7,15 +7,35 @@
 //
 
 import UIKit
+import CoreLocation
+import MobileCoreServices
 
-class TweetComposerViewController: UIViewController, UITextViewDelegate {
+@objc protocol TweetComposerViewControllerDelegate: class {
+    optional func tweetComposerViewController(sender: UIViewController, didPostNewTweet: Tweets)
+}
+
+
+class TweetComposerViewController: UIViewController, UITextViewDelegate, CLLocationManagerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
     // MARK: - Properties
     @IBOutlet weak var currentUserImageView: UIImageView!
     @IBOutlet weak var characterCountLabel: UILabel!
     @IBOutlet weak var replyToLabel: UILabel!
     @IBOutlet weak var postBarBottomConstraint: NSLayoutConstraint!
+    @IBOutlet weak var topbarAndTextAreaVerticalSpaceConstraint: NSLayoutConstraint!
     @IBOutlet weak var tweetComposerTextView: UITextView!
+    @IBOutlet weak var toggleLocationButton: UIButton!
+    @IBOutlet weak var addMediaButton: UIButton!
+    @IBOutlet weak var bottomBarView: UIView!
+
+    // Set up image view
+    var mediaImageView = UIImageView()
+    @IBOutlet weak var imageViewContainerView: UIView! {
+        didSet {
+            mediaImageView.contentMode = .ScaleAspectFit
+            imageViewContainerView.addSubview(mediaImageView)
+        }
+    }
 
     var tweet: Tweets?
 
@@ -40,8 +60,45 @@ class TweetComposerViewController: UIViewController, UITextViewDelegate {
         }
     }
 
+    var delegate: TweetComposerViewControllerDelegate?
+
+    var composingNewTweet: Bool!
+
+    var tagLocation = false {
+        didSet {
+            var titleColor = UIColor.lightGrayColor()
+            if tagLocation {
+                locationManager.startUpdatingLocation()
+                titleColor = AppConstants.Colors.LocationActivePinColor
+            } else {
+                locationManager.stopUpdatingLocation()
+                deviceLocation = nil
+            }
+            toggleLocationButton?.setTitleColor(titleColor, forState: .Normal)
+        }
+    }
+
+    var deviceLocation: CLLocation?
+    let locationManager = CLLocationManager()
+
+    var addMedia = false {
+        didSet {
+            var titleColor = UIColor.lightGrayColor()
+            if addMedia {
+                titleColor = AppConstants.Colors.MediaActiveIconColor
+            }
+            addMediaButton?.setTitleColor(titleColor, forState: .Normal)
+        }
+    }
+
     struct ViewConstants {
         static let CharacterLimit = 140
+        static let BottomBarAnimationSlideUpDelayDuration = 0.5
+        static let BottomBarAnimationSlideDownDelayDuration = 0.5
+        static let CameraActionSheetText = "Camera"
+        static let PhotoLibraryActionSheetText = "Photo Library"
+        static let CameraRollActionSheetText = "Camera Roll"
+        static let CancelActionSheetText = "Cancel"
     }
 
     // MARK: - Lifecycle methods
@@ -58,15 +115,32 @@ class TweetComposerViewController: UIViewController, UITextViewDelegate {
         tweetComposerTextView?.delegate = self
         tweetComposerTextView?.becomeFirstResponder()
 
+        // initial set up for location
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+        locationManager.requestWhenInUseAuthorization()
     }
 
     override func viewWillAppear(animated: Bool) {
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("keyboardWillShow:"), name:UIKeyboardWillShowNotification, object: nil);
-
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("keyboardWillShow:"), name:UIKeyboardWillShowNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("keyboardWillHide:"), name:UIKeyboardWillHideNotification, object: nil)
     }
 
     override func viewWillDisappear(animated: Bool) {
         NSNotificationCenter.defaultCenter().removeObserver(self);
+        locationManager.stopUpdatingLocation()
+    }
+
+    // MARK: - Location awreness
+    func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        if let location = locations.first {
+            deviceLocation = location
+        }
+    }
+
+    func locationManager(manager: CLLocationManager, didFailWithError error: NSError) {
+        print("\(error.localizedDescription)")
+        deviceLocation = nil
     }
 
     // MARK: - View Actions
@@ -77,10 +151,45 @@ class TweetComposerViewController: UIViewController, UITextViewDelegate {
 
     @IBAction func postTweetTapped(sender: UIButton) {
         tweetComposerTextView?.resignFirstResponder()
-        UserManager.updateUserStatus(postMessage!, inResponseToStatusId: tweet?.id) { (success, error) -> () in
-            print("Status posted with success: \(success)")
+        let location = tagLocation ? deviceLocation : nil
+        UserManager.updateUserStatus(postMessage!, inResponseToStatusId: tweet?.id, andLocation: location) { (tweet, error) -> () in
+            if let userTweet = tweet {
+                (self.composingNewTweet ?? true) ? self.delegate?.tweetComposerViewController?(self, didPostNewTweet: userTweet) : ()
+            }
         }
         dismissViewControllerAnimated(true, completion: nil)
+    }
+
+    @IBAction func captureMediaButton(sender: UIButton) {
+        addMedia = !addMedia
+        if UIImagePickerController.isSourceTypeAvailable(.Camera) {
+            let alert = UIAlertController(title: nil, message: nil, preferredStyle: UIAlertControllerStyle.ActionSheet)
+            alert.addAction(UIAlertAction(title: ViewConstants.CameraActionSheetText, style: .Default) { (action: UIAlertAction) -> Void in
+                self.presentPickerVCWithSourceType(.Camera)
+            })
+            alert.addAction(UIAlertAction(title: ViewConstants.PhotoLibraryActionSheetText, style: .Default) { (action: UIAlertAction) -> Void in
+                self.presentPickerVCWithSourceType(.PhotoLibrary)
+            })
+            alert.addAction(UIAlertAction(title: ViewConstants.CameraRollActionSheetText, style: .Default) { (action: UIAlertAction) -> Void in
+                self.presentPickerVCWithSourceType(.SavedPhotosAlbum)
+            })
+            alert.addAction(UIAlertAction(title: ViewConstants.CancelActionSheetText, style: UIAlertActionStyle.Cancel, handler: nil))
+
+            self.presentViewController(alert, animated: true, completion: nil)
+        }
+    }
+
+    private func presentPickerVCWithSourceType(sourceType: UIImagePickerControllerSourceType) {
+        let pickerVC = UIImagePickerController()
+        pickerVC.mediaTypes = [kUTTypeImage as String]
+        pickerVC.allowsEditing = true
+        pickerVC.delegate = self
+        pickerVC.sourceType = sourceType
+        presentViewController(pickerVC, animated: true, completion: nil)
+    }
+
+    @IBAction func toggleLocationTagging(sender: UIButton) {
+        tagLocation = !tagLocation
     }
 
     // MARK: - Keyboard show notification functions
@@ -89,9 +198,17 @@ class TweetComposerViewController: UIViewController, UITextViewDelegate {
             let frame = userInfo[UIKeyboardFrameEndUserInfoKey] as! NSValue
             let rect = frame.CGRectValue()
 
-            UIView.animateWithDuration(1.0) { () -> Void in
+            UIView.animateWithDuration(ViewConstants.BottomBarAnimationSlideUpDelayDuration) { () -> Void in
                 self.postBarBottomConstraint.constant = self.view.bounds.height - rect.origin.y
+                let newImageHeight = rect.origin.y - self.bottomBarView.frame.height - self.imageViewContainerView.frame.origin.y - self.topbarAndTextAreaVerticalSpaceConstraint.constant
+                self.mediaImageView.frame = CGRect(x: 0, y: 0, width: self.mediaImageView.frame.width, height: newImageHeight)
             }
+        }
+    }
+
+    func keyboardWillHide(sender: NSNotification) {
+        UIView.animateWithDuration(ViewConstants.BottomBarAnimationSlideDownDelayDuration) { () -> Void in
+            self.postBarBottomConstraint.constant = 0
         }
     }
 
@@ -108,6 +225,30 @@ class TweetComposerViewController: UIViewController, UITextViewDelegate {
         }
     }
 
+    // MARK: - Image Picker delegate functions
+    func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : AnyObject]) {
+        var image = info[UIImagePickerControllerEditedImage] as? UIImage
+        if image == nil {
+            image = info[UIImagePickerControllerOriginalImage] as? UIImage
+        }
+
+        mediaImageView.image = image
+        makeRoomForImage()
+        dismissViewControllerAnimated(true, completion: nil)
+        if let image = image {
+            if let imageData = UIImagePNGRepresentation(image) {
+                UserManager.uploadMedia(imageData) { (uploadedMediaDetails: NSDictionary?, error: NSError?) -> () in
+                    print(uploadedMediaDetails)
+                    print(error)
+                }
+            }
+        }
+    }
+
+    func imagePickerControllerDidCancel(picker: UIImagePickerController) {
+        dismissViewControllerAnimated(true, completion: nil)
+    }
+
     // MARK: - Helper methods
     private func prepareView() {
         currentUserImageView.layer.cornerRadius = 2
@@ -121,15 +262,30 @@ class TweetComposerViewController: UIViewController, UITextViewDelegate {
 
     private func updateUIWithTweetInfo() {
         if let name = tweet?.user?.name {
-            replyToLabel?.text = "In reply to \(name)"
+            replyToLabel?.attributedText = AppUtils.getAttributedStringForActionButtons("In reply to \(name)", icon: .ShortDownArrow, iconTextColor: UIColor.darkGrayColor(), withIconSize: 11, andBaseLine: -2)
             replyToLabel.alpha = 1
         }
 
-        if let screenName = tweet?.user?.screenName {
-            postMessage = "@\(screenName) "
+        if let screenName = tweet?.user?.stylizedScreenName {
+            postMessage = screenName
         }
     }
 
+    private func makeRoomForImage() {
+        var extraHeight: CGFloat = 0
+        if mediaImageView.image?.aspectRatio > 0 {
+            if let width = mediaImageView.superview?.frame.size.width {
+                let height = width / mediaImageView.image!.aspectRatio
+                extraHeight = height - mediaImageView.frame.height
+                mediaImageView.frame = CGRect(x: 0, y: 0, width: width, height: height)
+            }
+        } else {
+            extraHeight = -mediaImageView.frame.height
+            mediaImageView.frame = CGRectZero
+        }
+
+        preferredContentSize = CGSize(width: preferredContentSize.width, height: preferredContentSize.height + extraHeight)
+    }
     /*
     // MARK: - Navigation
 
@@ -141,3 +297,4 @@ class TweetComposerViewController: UIViewController, UITextViewDelegate {
     */
 
 }
+

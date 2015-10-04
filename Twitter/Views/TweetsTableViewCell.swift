@@ -12,6 +12,7 @@ import AFNetworking
 @objc protocol TweetsTableViewCellDelegate: class {
     optional func tweetCellFavoritedDidToggle(cell: TweetsTableViewCell, newValue: Bool)
     optional func tweetCellRetweetDidToggle(cell: TweetsTableViewCell, newValue: Bool)
+    optional func tweetCellDeleteStatus(cell: TweetsTableViewCell, withId id: Int)
 }
 
 class TweetsTableViewCell: UITableViewCell {
@@ -28,10 +29,11 @@ class TweetsTableViewCell: UITableViewCell {
     @IBOutlet weak var retweetButton: UIButton!
     @IBOutlet weak var replyButton: UIButton!
     @IBOutlet weak var favoriteTweetButton: UIButton!
+    @IBOutlet weak var deleteTweetButton: UIButton!
 
 
     // MARK: Others
-    static let EstimatedRowHeight = CGFloat(105)
+    static let EstimatedRowHeight = CGFloat(130)
 
     var tweet: Tweets! {
         didSet {
@@ -44,6 +46,7 @@ class TweetsTableViewCell: UITableViewCell {
             retweetButton?.tag = cellIndex!
             replyButton?.tag = cellIndex!
             favoriteTweetButton?.tag = cellIndex!
+            deleteTweetButton?.tag = cellIndex!
         }
     }
 
@@ -85,6 +88,10 @@ class TweetsTableViewCell: UITableViewCell {
         delegate?.tweetCellFavoritedDidToggle?(self, newValue: !tweet.currentUserFavorited!)
     }
 
+    @IBAction func deleteTweetButton(sender: UIButton) {
+        delegate?.tweetCellDeleteStatus?(self, withId: tweet.id!)
+    }
+
     // MARK: - Helper methods
     private func updateUIWithTweetDetails() {
         if let tweetUser = tweet.user {
@@ -100,6 +107,8 @@ class TweetsTableViewCell: UITableViewCell {
 
         retweetButton?.setAttributedTitle(retweetAttributedText, forState: UIControlState.Normal)
         favoriteTweetButton?.setAttributedTitle(favoriteAttributedText, forState: UIControlState.Normal)
+
+        deleteTweetButton.alpha = (tweet?.user?.screenName == UserManager.CurrentUser?.screenName) ? 1 : 0
     }
 
     private func getAttributedTextForActionButtons(count: Int?, userStatus: Bool?, iconType: FontasticIconType, activeColor: UIColor) -> NSAttributedString {
@@ -113,7 +122,7 @@ class TweetsTableViewCell: UITableViewCell {
         }
 
         let iconColor = (userStatus ?? false) ? activeColor : UIColor.darkGrayColor()
-        return AppUtils.getAttributedStringForActionButtons(countString, iconText: iconType.rawValue, iconTextColor: iconColor, andBaseLine: baseLineOffset)
+        return AppUtils.getAttributedStringForActionButtons(countString, icon: iconType, iconTextColor: iconColor, andBaseLine: baseLineOffset)
     }
 
 }
