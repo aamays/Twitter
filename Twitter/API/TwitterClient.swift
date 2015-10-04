@@ -47,9 +47,26 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
         }
 
         struct Tweet {
+            static let Id = "id"
             static let Text = "text"
             static let User = "user"
             static let CreatedAt = "created_at"
+            static let RetweetCount = "retweet_count"
+            static let Retweeted = "retweeted"
+            static let FavoriteCount = "favorite_count"
+            static let Favorited = "favorited"
+            static let RetweetStatus = "retweet_status"
+            struct RetweetStatusInfo {
+                static let Id = "id"
+            }
+        }
+
+        struct Retweet {
+            static let Id = "id"
+            static let RetweetStatus = "retweeted_status"
+            struct RetweetStatusInfo {
+                static let Id = "id"
+            }
         }
     }
 
@@ -59,6 +76,10 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
         static let OAuthAccessTokenEndpoint = "oauth/access_token"
         static let UserCredentialEndpoint = "1.1/account/verify_credentials.json"
         static let HomeTimelineEndpoint = "1.1/statuses/home_timeline.json"
+        static let RetweetStatusEndpoint = "1.1/statuses/retweet/:id.json"
+        static let DestroyStatusEndpoint = "1.1/statuses/destroy/:id.json"
+        static let FavoriteCreateEndpoint = "1.1/favorites/create.json"
+        static let FavoriteDestroyEndpoint = "1.1/favorites/destroy.json"
     }
 
     static let SharedInstance = TwitterClient(baseURL: APIScheme.BaseUrl, consumerKey: APICredentials.Info.Key, consumerSecret: APICredentials.Info.Secret)
@@ -107,6 +128,37 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
         TwitterClient.SharedInstance.GET(APIScheme.HomeTimelineEndpoint, parameters: nil, success: { (operation: AFHTTPRequestOperation!, response: AnyObject!) -> Void in
             let userTweets =  response as? [NSDictionary]
             completion?(userTweets, nil)
+            }) { (operation: AFHTTPRequestOperation!, error: NSError!) -> Void in
+                print(error.localizedDescription)
+                completion?(nil, error)
+        }
+    }
+
+    static func updateTweetStatusWitId(id: Int, status: Bool, WithCompletion completion: DictionaryDataCompletionBlock?) {
+        var useEndpoint = status ? APIScheme.RetweetStatusEndpoint : APIScheme.DestroyStatusEndpoint
+        useEndpoint = replaceIdInTwitterEndpointString(useEndpoint, id: id)
+        print(useEndpoint)
+        TwitterClient.SharedInstance.POST(useEndpoint, parameters: nil, success: { (operation: AFHTTPRequestOperation!, response: AnyObject!) -> Void in
+            let retweetResponse =  response as? NSDictionary
+            completion?(retweetResponse, nil)
+            }) { (operation: AFHTTPRequestOperation!, error: NSError!) -> Void in
+                completion?(nil, error)
+        }
+    }
+
+    private static func replaceIdInTwitterEndpointString(var endpointString: String, id: Int) -> String {
+        let range = endpointString.rangeOfString(":id", options: .LiteralSearch)
+        if let range = range {
+            endpointString = endpointString.stringByReplacingCharactersInRange(range, withString: "\(id)")
+        }
+        return endpointString
+    }
+
+    static func updateFavoriteStatusWitId(id: Int, status: Bool, WithCompletion completion: DictionaryDataCompletionBlock?) {
+        let useEndpoint = status ? APIScheme.FavoriteCreateEndpoint : APIScheme.FavoriteDestroyEndpoint
+        TwitterClient.SharedInstance.POST(useEndpoint, parameters: ["id": id], success: { (operation: AFHTTPRequestOperation!, response: AnyObject!) -> Void in
+            let retweetResponse =  response as? NSDictionary
+            completion?(retweetResponse, nil)
             }) { (operation: AFHTTPRequestOperation!, error: NSError!) -> Void in
                 completion?(nil, error)
         }
