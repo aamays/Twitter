@@ -8,19 +8,35 @@
 
 import UIKit
 
-class TweetComposerViewController: UIViewController {
+class TweetComposerViewController: UIViewController, UITextViewDelegate {
 
     // MARK: - Properties
     @IBOutlet weak var currentUserImageView: UIImageView!
-
     @IBOutlet weak var characterCountLabel: UILabel!
     @IBOutlet weak var replyToLabel: UILabel!
     @IBOutlet weak var postBarBottomConstraint: NSLayoutConstraint!
+    @IBOutlet weak var tweetComposerTextView: UITextView!
 
     var tweet: Tweets?
 
     var postMessage: String? {
-        didSet {
+        get {
+            return tweetComposerTextView?.text
+        }
+        set(newValue) {
+            if let _ = tweetComposerTextView {
+                tweetComposerTextView.text = newValue
+                remainingCharacterCount = remainingCharacterCount*1
+            }
+        }
+    }
+
+    var remainingCharacterCount: Int {
+        get {
+            return ViewConstants.CharacterLimit - (postMessage?.characters.count ?? 0)
+        }
+        set(newValue) {
+            characterCountLabel?.text = "\(newValue)"
         }
     }
 
@@ -35,10 +51,18 @@ class TweetComposerViewController: UIViewController {
         // Do any additional setup after loading the view.
         prepareView()
 
+        if let _ = tweet {
+            updateUIWithTweetInfo()
+        }
+
+        tweetComposerTextView?.delegate = self
+        tweetComposerTextView?.becomeFirstResponder()
+
     }
 
     override func viewWillAppear(animated: Bool) {
         NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("keyboardWillShow:"), name:UIKeyboardWillShowNotification, object: nil);
+
     }
 
     override func viewWillDisappear(animated: Bool) {
@@ -47,12 +71,17 @@ class TweetComposerViewController: UIViewController {
 
     // MARK: - View Actions
     @IBAction func dismissButtonTapped(sender: UIButton) {
+        tweetComposerTextView?.resignFirstResponder()
         dismissViewControllerAnimated(true, completion: nil)
     }
 
     @IBAction func postTweetTapped(sender: UIButton) {
+        tweetComposerTextView?.resignFirstResponder()
+        UserManager.updateUserStatus(postMessage!, inResponseToStatusId: tweet?.id) { (success, error) -> () in
+            print("Status posted with success: \(success)")
+        }
+        dismissViewControllerAnimated(true, completion: nil)
     }
-
 
     // MARK: - Keyboard show notification functions
     func keyboardWillShow(sender: NSNotification) {
@@ -63,6 +92,19 @@ class TweetComposerViewController: UIViewController {
             UIView.animateWithDuration(1.0) { () -> Void in
                 self.postBarBottomConstraint.constant = self.view.bounds.height - rect.origin.y
             }
+        }
+    }
+
+    // MARK: - UI Text view delegate methods
+    func textViewDidChange(textView: UITextView) {
+        remainingCharacterCount = remainingCharacterCount*1
+        if remainingCharacterCount == 0 {
+            characterCountLabel?.textColor = UIColor.redColor()
+        } else if remainingCharacterCount < 0 {
+            postMessage = postMessage!.substringToIndex((postMessage?.endIndex.predecessor())!)
+            AppUtils.shakeUIView(characterCountLabel)
+        } else {
+            characterCountLabel?.textColor = UIColor.blackColor()
         }
     }
 
@@ -80,6 +122,7 @@ class TweetComposerViewController: UIViewController {
     private func updateUIWithTweetInfo() {
         if let name = tweet?.user?.name {
             replyToLabel?.text = "In reply to \(name)"
+            replyToLabel.alpha = 1
         }
 
         if let screenName = tweet?.user?.screenName {

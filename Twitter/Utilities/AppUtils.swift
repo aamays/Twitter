@@ -39,4 +39,14 @@ struct AppUtils {
         attributedString.appendAttributedString(NSAttributedString(string: message))
         return attributedString
     }
+
+    static func shakeUIView(targetView: UIView, withOffset offset: CGFloat = 5) {
+        let animation = CABasicAnimation(keyPath: "position")
+        animation.duration = 0.07
+        animation.repeatCount = 1
+        animation.autoreverses = true
+        animation.fromValue = NSValue(CGPoint: CGPointMake(targetView.center.x - offset, targetView.center.y))
+        animation.toValue = NSValue(CGPoint: CGPointMake(targetView.center.x + offset, targetView.center.y))
+        targetView.layer.addAnimation(animation, forKey: "position")
+    }
 }

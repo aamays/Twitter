@@ -254,6 +254,9 @@
                         </view>
                         <barButtonItem key="rightBarButtonItem" systemItem="compose" id="fai-t0-YMD">
                             <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            <connections>
+                                <segue destination="gM7-Ec-gLk" kind="presentation" identifier="Compose New Status" id="Yaq-ij-aqh"/>
+                            </connections>
                         </barButtonItem>
                     </navigationItem>
                     <connections>
@@ -333,7 +336,7 @@
                                                 </connections>
                                             </button>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="140" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wAv-QL-Xh0">
-                                                <rect key="frame" x="533" y="12" width="21" height="15"/>
+                                                <rect key="frame" x="8" y="12" width="21" height="15"/>
                                                 <fontDescription key="fontDescription" style="UICTFontTextStyleFootnote"/>
                                                 <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                 <nil key="highlightedColor"/>
@@ -341,25 +344,41 @@
                                         </subviews>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <constraints>
-                                            <constraint firstItem="ZQ2-bV-wUP" firstAttribute="leading" secondItem="wAv-QL-Xh0" secondAttribute="trailing" constant="8" id="1OG-vM-8t2"/>
+                                            <constraint firstItem="ZQ2-bV-wUP" firstAttribute="leading" secondItem="wAv-QL-Xh0" secondAttribute="trailing" constant="533" id="1OG-vM-8t2"/>
                                             <constraint firstAttribute="trailing" secondItem="ZQ2-bV-wUP" secondAttribute="trailing" constant="8" id="B2T-99-eRa"/>
                                             <constraint firstItem="ZQ2-bV-wUP" firstAttribute="centerY" secondItem="rS4-EL-f2D" secondAttribute="centerY" id="E52-t3-ZsM"/>
-                                            <constraint firstItem="wAv-QL-Xh0" firstAttribute="centerY" secondItem="ZQ2-bV-wUP" secondAttribute="centerY" constant="-0.5" id="HSy-Nv-u8i"/>
+                                            <constraint firstItem="wAv-QL-Xh0" firstAttribute="centerY" secondItem="ZQ2-bV-wUP" secondAttribute="centerY" id="HSy-Nv-u8i"/>
                                             <constraint firstItem="wAv-QL-Xh0" firstAttribute="baseline" secondItem="ZQ2-bV-wUP" secondAttribute="baseline" id="Jan-Sq-Oh1"/>
                                             <constraint firstAttribute="height" constant="40" id="Uwp-eV-Ycu"/>
+                                            <constraint firstItem="wAv-QL-Xh0" firstAttribute="leading" secondItem="rS4-EL-f2D" secondAttribute="leading" constant="8" id="u06-5e-gHY"/>
                                         </constraints>
                                         <variation key="default">
                                             <mask key="constraints">
                                                 <exclude reference="Jan-Sq-Oh1"/>
+                                                <exclude reference="1OG-vM-8t2"/>
                                             </mask>
                                         </variation>
                                     </view>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="In reply to Forbes" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="prg-h6-nl4">
+                                    <label opaque="NO" userInteractionEnabled="NO" alpha="0.0" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="In reply to Forbes" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="prg-h6-nl4">
                                         <rect key="frame" x="8" y="50" width="584" height="15"/>
                                         <fontDescription key="fontDescription" style="UICTFontTextStyleFootnote"/>
                                         <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                         <nil key="highlightedColor"/>
                                     </label>
+                                    <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" verticalCompressionResistancePriority="740" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="9x4-HO-HLS">
+                                        <rect key="frame" x="8" y="84" width="584" height="150"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="150" id="PmG-e1-2rB"/>
+                                            <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="150" id="Wb9-pf-SjI"/>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" style="UICTFontTextStyleTitle2"/>
+                                        <textInputTraits key="textInputTraits" autocapitalizationType="sentences" autocorrectionType="no"/>
+                                        <variation key="default">
+                                            <mask key="constraints">
+                                                <exclude reference="Wb9-pf-SjI"/>
+                                            </mask>
+                                        </variation>
+                                    </textView>
                                 </subviews>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
@@ -367,10 +386,13 @@
                                     <constraint firstItem="prg-h6-nl4" firstAttribute="top" secondItem="199-tY-Y7c" secondAttribute="bottom" id="9Bi-sf-2cn"/>
                                     <constraint firstAttribute="bottom" secondItem="rS4-EL-f2D" secondAttribute="bottom" id="Aoe-az-04G"/>
                                     <constraint firstAttribute="trailing" secondItem="prg-h6-nl4" secondAttribute="trailing" constant="8" id="EFL-em-8XJ"/>
+                                    <constraint firstItem="9x4-HO-HLS" firstAttribute="leading" secondItem="ayJ-cZ-1a2" secondAttribute="leading" constant="8" id="Y0J-I9-1HL"/>
                                     <constraint firstItem="rS4-EL-f2D" firstAttribute="leading" secondItem="ayJ-cZ-1a2" secondAttribute="leading" id="aWl-um-DdQ"/>
                                     <constraint firstItem="prg-h6-nl4" firstAttribute="leading" secondItem="ayJ-cZ-1a2" secondAttribute="leading" constant="8" id="oEi-pw-yBr"/>
                                     <constraint firstAttribute="trailing" secondItem="199-tY-Y7c" secondAttribute="trailing" id="oXl-6r-IXo"/>
                                     <constraint firstItem="199-tY-Y7c" firstAttribute="leading" secondItem="ayJ-cZ-1a2" secondAttribute="leading" id="pSX-W4-2oK"/>
+                                    <constraint firstAttribute="trailing" secondItem="9x4-HO-HLS" secondAttribute="trailing" constant="8" id="yLq-Th-Ksi"/>
+                                    <constraint firstItem="9x4-HO-HLS" firstAttribute="top" secondItem="prg-h6-nl4" secondAttribute="bottom" constant="19" id="z3M-pJ-mrN"/>
                                 </constraints>
                             </view>
                         </subviews>
@@ -396,6 +418,7 @@
                         <outlet property="currentUserImageView" destination="gnz-aN-lNV" id="w8Y-e3-gUg"/>
                         <outlet property="postBarBottomConstraint" destination="Aoe-az-04G" id="yx2-ps-fnu"/>
                         <outlet property="replyToLabel" destination="prg-h6-nl4" id="vfC-q5-9Ad"/>
+                        <outlet property="tweetComposerTextView" destination="9x4-HO-HLS" id="xSi-zJ-S2Q"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="NgF-72-tQV" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -428,4 +451,7 @@
     <resources>
         <image name="TwitterLogo_white" width="1687" height="1687"/>
     </resources>
+    <inferredMetricsTieBreakers>
+        <segue reference="Yaq-ij-aqh"/>
+    </inferredMetricsTieBreakers>
 </document>

@@ -45,6 +45,16 @@ class UserManager: NSObject {
         }
     }
 
+    class func updateUserStatus(status: String, inResponseToStatusId statusId: Int?, withCompletion completion: (Bool, NSError?) -> ()) {
+        TwitterClient.updateStatus(status, inResponseToStatusId: statusId) { (responseData: NSDictionary?, error: NSError?) -> () in
+            if error == nil {
+                completion(true, nil)
+            } else {
+                completion(false, error)
+            }
+        }
+    }
+
     class func logoutCurrentUser() {
         CurrentUser = nil
     }

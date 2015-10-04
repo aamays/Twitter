@@ -153,8 +153,10 @@ class HomeTimelineViewController: UIViewController, UITableViewDelegate, UITable
         // Get the new view controller using segue.destinationViewController.
         // Pass the selected object to the new view controller.
         if let navVC = segue.destinationViewController as? TweetComposerViewController {
-            if let tag = sender?.tag {
-                navVC.tweet = currentUserTweets?[tag]
+            if segue.identifier == AppConstants.MainStoryboard.ComposeReplySegueIdentifier {
+                if let tag = sender?.tag {
+                    navVC.tweet = currentUserTweets?[tag]
+                }
             }
         }
     }

@@ -76,6 +76,7 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
         static let OAuthAccessTokenEndpoint = "oauth/access_token"
         static let UserCredentialEndpoint = "1.1/account/verify_credentials.json"
         static let HomeTimelineEndpoint = "1.1/statuses/home_timeline.json"
+        static let UpdateStatusEndpoint = "1.1/statuses/update.json"
         static let RetweetStatusEndpoint = "1.1/statuses/retweet/:id.json"
         static let DestroyStatusEndpoint = "1.1/statuses/destroy/:id.json"
         static let FavoriteCreateEndpoint = "1.1/favorites/create.json"
@@ -157,6 +158,21 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
     static func updateFavoriteStatusWitId(id: Int, status: Bool, WithCompletion completion: DictionaryDataCompletionBlock?) {
         let useEndpoint = status ? APIScheme.FavoriteCreateEndpoint : APIScheme.FavoriteDestroyEndpoint
         TwitterClient.SharedInstance.POST(useEndpoint, parameters: ["id": id], success: { (operation: AFHTTPRequestOperation!, response: AnyObject!) -> Void in
+            let retweetResponse =  response as? NSDictionary
+            completion?(retweetResponse, nil)
+            }) { (operation: AFHTTPRequestOperation!, error: NSError!) -> Void in
+                completion?(nil, error)
+        }
+    }
+
+    static func updateStatus(status: String, inResponseToStatusId replyStatusId: Int?, withCompletion completion: DictionaryDataCompletionBlock?) {
+        let parameters = NSMutableDictionary()
+        parameters["status"] = status
+        if let replyStatusId = replyStatusId {
+            parameters["in_reply_to_status_id"] = replyStatusId
+        }
+
+        TwitterClient.SharedInstance.POST(APIScheme.UpdateStatusEndpoint, parameters: parameters, success: { (operation: AFHTTPRequestOperation!, response: AnyObject!) -> Void in
             let retweetResponse =  response as? NSDictionary
             completion?(retweetResponse, nil)
             }) { (operation: AFHTTPRequestOperation!, error: NSError!) -> Void in

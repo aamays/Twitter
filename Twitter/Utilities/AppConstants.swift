@@ -27,6 +27,7 @@ struct AppConstants {
         static let HomeTimelineNavVCIdentifier = "HomeTimelineNavigationViewController"
         static let TweetComposerVCIdentifier = "TweetComposerViewController"
         static let ComposeReplySegueIdentifier = "Compose Reply"
+        static let ComposeNewStatusSegueIndentifier = "Compose New Status"
     }
 
     struct Colors {
