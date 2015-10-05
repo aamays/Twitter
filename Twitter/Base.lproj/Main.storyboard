@@ -833,7 +833,7 @@
                                 </variation>
                             </imageView>
                         </subviews>
-                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                         <gestureRecognizers/>
                         <constraints>
                             <constraint firstItem="3Mm-vm-ICM" firstAttribute="leading" secondItem="BWb-FT-Edb" secondAttribute="leading" id="EUw-PT-cCh"/>

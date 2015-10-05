@@ -158,6 +158,7 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
             parameters[order.rawValue] = id
         }
 
+        print(parameters)
         TwitterClient.SharedInstance.GET(APIScheme.HomeTimelineEndpoint, parameters: parameters, success: { (operation: AFHTTPRequestOperation!, response: AnyObject!) -> Void in
             let userTweets =  response as? [NSDictionary]
             completion?(userTweets, nil)
