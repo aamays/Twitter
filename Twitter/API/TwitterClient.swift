@@ -82,11 +82,17 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
                 static let Id = "id"
             }
         }
+
+        struct ShowTweet {
+            static let CurrentUserRetweet = "current_user_retweet"
+            static let CurrentUserRetweetId = "id"
+        }
     }
 
     struct RequestFields {
         static let StatusHomeTimelineCount = "count"
         static let StatusHomeTimelineMaxId = "max_id"
+        static let ShowStatusIncludeMyTweet = "include_my_retweet"
     }
 
     struct APIScheme {
@@ -97,6 +103,7 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
         static let OAuthAccessTokenEndpoint = "oauth/access_token"
         static let UserCredentialEndpoint = "1.1/account/verify_credentials.json"
         static let HomeTimelineEndpoint = "1.1/statuses/home_timeline.json"
+        static let ShowStatusEndpoint = "1.1/statuses/show/:id.json"
         static let UpdateStatusEndpoint = "1.1/statuses/update.json"
         static let RetweetStatusEndpoint = "1.1/statuses/retweet/:id.json"
         static let RetweetsOfStatusEndpoint = "1.1/statuses/retweets/:id.json"
@@ -168,11 +175,13 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
         }
     }
 
-    static func fetchRetweetsOfStatusWithId(id: Int, andCompletion completion: ArrayDataCompletionBlock?) {
-        let endpoint = replaceIdInTwitterEndpointString(APIScheme.RetweetsOfStatusEndpoint, id: id)
-        TwitterClient.SharedInstance.GET(endpoint, parameters: nil, success: { (operation: AFHTTPRequestOperation!, response: AnyObject!) -> Void in
-            let statusRetweets =  response as? [NSDictionary]
-            completion?(statusRetweets, nil)
+    static func fetchRetweetsOfStatusWithId(id: Int, andCompletion completion: DictionaryDataCompletionBlock?) {
+        let endpoint = replaceIdInTwitterEndpointString(APIScheme.ShowStatusEndpoint, id: id)
+        let parameters = NSMutableDictionary()
+        parameters[RequestFields.ShowStatusIncludeMyTweet] = 1
+        TwitterClient.SharedInstance.GET(endpoint, parameters: parameters, success: { (operation: AFHTTPRequestOperation!, response: AnyObject!) -> Void in
+            let tweetStatus =  response as? NSDictionary
+            completion?(tweetStatus, nil)
             }) { (operation: AFHTTPRequestOperation!, error: NSError!) -> Void in
                 print(error.localizedDescription)
                 completion?(nil, error)

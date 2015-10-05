@@ -177,6 +177,13 @@ class HomeTimelineViewController: UIViewController, UITableViewDelegate, UITable
                 } else {
                     self.currentUserTweets = userTweets
                 }
+
+                // fetch retweet id if retweeted by user
+                for tweet in self.currentUserTweets! {
+                    if tweet.retweetId == nil && tweet.currentUserRetweeted! {
+                        tweet.updateRetweetId()
+                    }
+                }
             } else {
                 self.displayInformationalAlertView(ViewConfigParameters.PopupAlertDefaultMessage)
             }

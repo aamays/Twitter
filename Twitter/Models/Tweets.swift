@@ -31,6 +31,8 @@ class Tweets: NSObject {
     var hasMedia = false
     var mediaUrl: NSURL?
 
+    var retweetOfTweetId: Int?
+
     init(dictionary: NSDictionary) {
 
         id = dictionary[TwitterClient.ResponseFields.Tweet.Id] as? Int
@@ -62,6 +64,11 @@ class Tweets: NSObject {
                 }
             }
         }
+
+        // add retweeted status id
+        if let retweetedStatus = dictionary[TwitterClient.ResponseFields.Retweet.RetweetStatus] as? NSDictionary {
+            retweetOfTweetId = retweetedStatus[TwitterClient.ResponseFields.Retweet.Id] as? Int
+        }
     }
 
     // MARK: - Instance methods
@@ -89,18 +96,11 @@ class Tweets: NSObject {
 
     func updateRetweetId() {
         // @todo: fix below code to update the tweets array table
-//        TwitterClient.fetchRetweetsOfStatusWithId(id!) { (statusRetweets:[NSDictionary]?, error: NSError?) -> () in
-//            if let retweets = statusRetweets {
-//                let retweetsArray = retweets.map { Tweets(dictionary: $0) }
-//                for tweet in retweetsArray {
-//                    if tweet.user!.id == UserManager.CurrentUser!.id {
-//                        print("Retweet id assigned.... \(self.id) <===> \(tweet.id)")
-//                        self.retweetId = tweet.id
-//                        break
-//                    }
-//                }
-//            }
-//        }
+        TwitterClient.fetchRetweetsOfStatusWithId(retweetOfTweetId ?? id!) { (tweetStatus: NSDictionary?, error: NSError?) -> () in
+            if let currentUserRetweet = tweetStatus?[TwitterClient.ResponseFields.ShowTweet.CurrentUserRetweet] as? NSDictionary {
+                self.retweetId = currentUserRetweet[TwitterClient.ResponseFields.ShowTweet.CurrentUserRetweetId] as? Int
+            }
+        }
     }
 
     // MARK: - Class type methods
@@ -110,7 +110,6 @@ class Tweets: NSObject {
                 var currentUserTweets = [Tweets]()
                 for tweetInfoDict in tweetsArray {
                     let tweet = Tweets(dictionary: tweetInfoDict)
-                    tweet.currentUserRetweeted! ? tweet.updateRetweetId() : ()
                     currentUserTweets.append(tweet)
                 }
                 completion(currentUserTweets, nil)
