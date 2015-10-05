@@ -35,7 +35,7 @@ Time spent: 25 hours
 
 ### Walkthrough
 
-![Video Walkthrough](TwitterDemo.gif)
+![Video Walkthrough](TwitterDemo2.gif)
 
 GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
