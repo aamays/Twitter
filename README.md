@@ -39,6 +39,15 @@ Time spent: 25 hours
 
 GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
+#### Installation setup instructions
+
+* For app to work properly, you need to provide a valid <b>Consumer Key</b> and <b>Consmer Secret</b> to the app
+* To add <b>Consumer Key</b> and <b>Consmer Secret</b>,
+ * Open [CredentialsInfo.plist](https://github.com/aamays/Twitter/blob/master/Twitter/CredentialsInfo.plist) in Twitter folder
+ * Set <b>ConsumerKey</b> key's value to your app's Consumer Key
+ * Set <b>ConsumerSecret</b> key's value to your app's Consmer Secret
+ * Save the file
+
 #### Development/Testing environment
 
 * Operating System: Yosemite v10.10.4
