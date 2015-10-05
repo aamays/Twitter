@@ -51,9 +51,3 @@ struct AppUtils {
         targetView.layer.addAnimation(animation, forKey: "position")
     }
 }
-
-extension UIImage {
-    var aspectRatio: CGFloat {
-        return size.height != 0 ? size.width / size.height : 0
-    }
-}

@@ -28,6 +28,8 @@ class Tweets: NSObject {
     var favoriteCount: Int?
     var currentUserFavorited: Bool?
 
+    var hasMedia = false
+    var mediaUrl: NSURL?
 
     init(dictionary: NSDictionary) {
 
@@ -51,6 +53,15 @@ class Tweets: NSObject {
         favoriteCount = dictionary[TwitterClient.ResponseFields.Tweet.FavoriteCount] as? Int
         currentUserFavorited = (dictionary[TwitterClient.ResponseFields.Tweet.Favorited] as! Bool)
 
+        // check and add media url (currently this application only supports photos)
+        if let entitiesMedia = dictionary[TwitterClient.ResponseFields.Tweet.Entities]?[TwitterClient.ResponseFields.Tweet.EntitiesMedia] as? [NSDictionary] {
+            for mediaInfo in entitiesMedia {
+                if mediaInfo[TwitterClient.ResponseFields.Tweet.EntitiesMediaType] as! String == TwitterMediaTypes.photo.rawValue {
+                    hasMedia = true
+                    mediaUrl = NSURL(string: mediaInfo[TwitterClient.ResponseFields.Tweet.EntitiesMediaHttpsUrl] as! String)
+                }
+            }
+        }
     }
 
     // MARK: - Instance methods
@@ -77,13 +88,24 @@ class Tweets: NSObject {
     }
 
     func updateRetweetId() {
-        // @todo: somehow updated the retweet id
-        retweetId = id
+        // @todo: fix below code to update the tweets array table
+//        TwitterClient.fetchRetweetsOfStatusWithId(id!) { (statusRetweets:[NSDictionary]?, error: NSError?) -> () in
+//            if let retweets = statusRetweets {
+//                let retweetsArray = retweets.map { Tweets(dictionary: $0) }
+//                for tweet in retweetsArray {
+//                    if tweet.user!.id == UserManager.CurrentUser!.id {
+//                        print("Retweet id assigned.... \(self.id) <===> \(tweet.id)")
+//                        self.retweetId = tweet.id
+//                        break
+//                    }
+//                }
+//            }
+//        }
     }
 
     // MARK: - Class type methods
-    class func getCurrentUserTweetsWithCompletion(completion: ([Tweets]?, NSError?) -> ()) {
-        TwitterClient.fetchUserTweetsWithCompletion { (tweetsArray:[NSDictionary]?, error: NSError?) -> () in
+    class func getCurrentUserTweetsWithCompletion(id: Int?, withOrder order: HomeTimeLineFetchOrder?, completion: ([Tweets]?, NSError?) -> ()) {
+        TwitterClient.fetchUserTweetsWithCompletion(id, withOrder: order) { (tweetsArray:[NSDictionary]?, error: NSError?) -> () in
             if let tweetsArray = tweetsArray {
                 var currentUserTweets = [Tweets]()
                 for tweetInfoDict in tweetsArray {

@@ -14,7 +14,14 @@ typealias SuccessCompletionBlock = (Bool, NSError?) -> ()
 typealias DictionaryDataCompletionBlock = (NSDictionary?, NSError?) -> ()
 typealias ArrayDataCompletionBlock = ([NSDictionary]?, NSError?) -> ()
 
+enum HomeTimeLineFetchOrder: String {
+    case Since = "since_id"
+    case Before = "max_id"
+}
+
 class TwitterClient: BDBOAuth1RequestOperationManager {
+
+    static let FetchResultsCount = 20
 
     private struct APICredentials {
         static let ResouceName = "CredentialsInfo"
@@ -36,6 +43,7 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
     // Twitter API dictionary keys
     struct ResponseFields {
         struct User {
+            static let Id = "id"
             static let Name = "name"
             static let SreenName = "screen_name"
             static let ProfileImageUrlStr = "profile_image_url_https"
@@ -45,6 +53,7 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
             static let FollowingCount = "following"
             static let NotificationsCount = "notifications"
             static let CreatedAt = "created_at"
+            static let Verified = "verified"
         }
 
         struct Tweet {
@@ -60,6 +69,10 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
             struct RetweetStatusInfo {
                 static let Id = "id"
             }
+            static let Entities = "entities"
+            static let EntitiesMedia = "media"
+            static let EntitiesMediaHttpsUrl = "media_url_https"
+            static let EntitiesMediaType = "type"
         }
 
         struct Retweet {
@@ -69,6 +82,11 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
                 static let Id = "id"
             }
         }
+    }
+
+    struct RequestFields {
+        static let StatusHomeTimelineCount = "count"
+        static let StatusHomeTimelineMaxId = "max_id"
     }
 
     struct APIScheme {
@@ -81,6 +99,7 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
         static let HomeTimelineEndpoint = "1.1/statuses/home_timeline.json"
         static let UpdateStatusEndpoint = "1.1/statuses/update.json"
         static let RetweetStatusEndpoint = "1.1/statuses/retweet/:id.json"
+        static let RetweetsOfStatusEndpoint = "1.1/statuses/retweets/:id.json"
         static let DestroyStatusEndpoint = "1.1/statuses/destroy/:id.json"
         static let FavoriteCreateEndpoint = "1.1/favorites/create.json"
         static let FavoriteDestroyEndpoint = "1.1/favorites/destroy.json"
@@ -132,10 +151,27 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
         }
     }
 
-    static func fetchUserTweetsWithCompletion(completion: ArrayDataCompletionBlock?) {
-        TwitterClient.SharedInstance.GET(APIScheme.HomeTimelineEndpoint, parameters: nil, success: { (operation: AFHTTPRequestOperation!, response: AnyObject!) -> Void in
+    static func fetchUserTweetsWithCompletion(id: Int?, withOrder order: HomeTimeLineFetchOrder?, completion: ArrayDataCompletionBlock?) {
+        let parameters = NSMutableDictionary()
+        parameters[RequestFields.StatusHomeTimelineCount] = FetchResultsCount
+        if let id = id, let order = order {
+            parameters[order.rawValue] = id
+        }
+
+        TwitterClient.SharedInstance.GET(APIScheme.HomeTimelineEndpoint, parameters: parameters, success: { (operation: AFHTTPRequestOperation!, response: AnyObject!) -> Void in
             let userTweets =  response as? [NSDictionary]
             completion?(userTweets, nil)
+            }) { (operation: AFHTTPRequestOperation!, error: NSError!) -> Void in
+                print(error.localizedDescription)
+                completion?(nil, error)
+        }
+    }
+
+    static func fetchRetweetsOfStatusWithId(id: Int, andCompletion completion: ArrayDataCompletionBlock?) {
+        let endpoint = replaceIdInTwitterEndpointString(APIScheme.RetweetsOfStatusEndpoint, id: id)
+        TwitterClient.SharedInstance.GET(endpoint, parameters: nil, success: { (operation: AFHTTPRequestOperation!, response: AnyObject!) -> Void in
+            let statusRetweets =  response as? [NSDictionary]
+            completion?(statusRetweets, nil)
             }) { (operation: AFHTTPRequestOperation!, error: NSError!) -> Void in
                 print(error.localizedDescription)
                 completion?(nil, error)
@@ -199,7 +235,6 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
     static func uploadMedia(media: NSData, withCompletion completion: DictionaryDataCompletionBlock?) {
         TwitterClient.ShareUploadInstace.POST(APIScheme.MediaUploadEndpoint, parameters: nil, constructingBodyWithBlock: { (data: AFMultipartFormData!) -> Void in
             data.appendPartWithFormData(media, name: "media")
-//            data.
             }, success: { (operation: AFHTTPRequestOperation!, response: AnyObject!) -> Void in
             let uploadResponse =  response as? NSDictionary
             print(uploadResponse)

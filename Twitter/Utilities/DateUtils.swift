@@ -13,6 +13,7 @@ class DateUtils: NSObject {
     static let DateComponentsFormatter = NSDateComponentsFormatter()
 
     static let TwitterApiResponseDateFormat = "EEE MMM d HH:mm:ss Z y"
+    static let PresentationLongDateFormat = "yyyy'-'MM'-'dd'THH:mm"
 
     static func getTimeElapsedSinceDate(sinceDate: NSDate) -> String {
         DateComponentsFormatter.unitsStyle = NSDateComponentsFormatterUnitsStyle.Abbreviated
@@ -20,5 +21,11 @@ class DateUtils: NSObject {
         DateComponentsFormatter.maximumUnitCount = 1
         let interval = NSDate().timeIntervalSinceDate(sinceDate)
         return DateComponentsFormatter.stringFromTimeInterval(interval)!
+    }
+
+    static func getPresentationDateString(sinceDate: NSDate) -> String {
+        DateFormatter.dateStyle = NSDateFormatterStyle.ShortStyle
+        DateFormatter.timeStyle = .ShortStyle
+        return DateFormatter.stringFromDate(sinceDate)
     }
 }

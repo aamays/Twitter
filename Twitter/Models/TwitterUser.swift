@@ -19,6 +19,7 @@ import UIKit
 
 class TwitterUser: NSObject, NSCoding {
 
+    var id: Int!
     var name: String?
     var screenName: String?
     var stylizedScreenName: String? {
@@ -46,8 +47,11 @@ class TwitterUser: NSObject, NSCoding {
     var notificationsCount: Int?
     var createdAt: NSDate?
 
+    var isVerified = false
 
     init(dictionary: NSDictionary) {
+
+        id = dictionary[TwitterClient.ResponseFields.User.Id] as! Int
 
         name = dictionary[TwitterClient.ResponseFields.User.Name] as? String
         screenName = dictionary[TwitterClient.ResponseFields.User.SreenName] as? String
@@ -68,11 +72,16 @@ class TwitterUser: NSObject, NSCoding {
             DateUtils.DateFormatter.dateFormat = DateUtils.TwitterApiResponseDateFormat
             createdAt = DateUtils.DateFormatter.dateFromString(dateString)
         }
+
+        if let verified = dictionary[TwitterClient.ResponseFields.User.Verified] as? Bool {
+            isVerified = verified
+        }
     }
 
     // MARK: - NSCoding methods
     required convenience init?(coder aDecoder: NSCoder) {
         let userDetailsDictionary = NSMutableDictionary()
+        userDetailsDictionary.setValue(aDecoder.decodeIntegerForKey(TwitterClient.ResponseFields.User.Id), forKey: TwitterClient.ResponseFields.User.Id)
         userDetailsDictionary.setValue(aDecoder.decodeObjectForKey(TwitterClient.ResponseFields.User.Name) as? String, forKey: TwitterClient.ResponseFields.User.Name)
         userDetailsDictionary.setValue(aDecoder.decodeObjectForKey(TwitterClient.ResponseFields.User.SreenName) as? String, forKey: TwitterClient.ResponseFields.User.SreenName)
 
@@ -90,6 +99,8 @@ class TwitterUser: NSObject, NSCoding {
     }
 
     func encodeWithCoder(aCoder: NSCoder) {
+
+        aCoder.encodeInteger(id, forKey: TwitterClient.ResponseFields.User.Id)
         aCoder.encodeObject(name, forKey: TwitterClient.ResponseFields.User.Name)
         aCoder.encodeObject(screenName, forKey: TwitterClient.ResponseFields.User.SreenName)
         aCoder.encodeInteger(friendsCount!, forKey: TwitterClient.ResponseFields.User.FriendsCount)

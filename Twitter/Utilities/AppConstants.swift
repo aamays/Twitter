@@ -27,6 +27,7 @@ struct AppConstants {
         static let HomeTimelineNavVCIdentifier = "HomeTimelineNavigationViewController"
         static let TweetComposerVCIdentifier = "TweetComposerViewController"
         static let ComposeReplySegueIdentifier = "Compose Reply"
+        static let ShowFullImageSegueIdentifier = "Show Full Image"
         static let ComposeNewStatusSegueIndentifier = "Compose New Status"
     }
 
@@ -36,6 +37,7 @@ struct AppConstants {
         static let TwitterBlueColor = UIColor(red: 85/255, green: 172/255, blue: 238/255, alpha: 1)
         static let LocationActivePinColor = UIColor(red: 228/255, green: 48/255, blue: 26/255, alpha: 1)
         static let MediaActiveIconColor = UIColor(red: 128/255, green: 64/255, blue: 23/255, alpha: 1)
+        static let LightBorderColor = UIColor(red: 204/255, green: 204/255, blue: 204/255, alpha: 1)
     }
 }
 
@@ -58,5 +60,17 @@ struct FontasticIcons {
 }
 
 enum TweetDetailsViewCell: String {
-    case TweetAndOwnerViewCell
+    case TweetAndOwnerViewCell, TweetMediaViewCell, TweetTimeStampViewCell, TweetMeasuresViewCell, UserActionViewCell, TweetRepliesViewCell
+}
+
+enum TwitterMediaTypes: String {
+    case photo
+}
+
+enum BorderPotion {
+    case Top, Bottom
+}
+
+enum TweetMeasures {
+    case Retweet, Favorite
 }

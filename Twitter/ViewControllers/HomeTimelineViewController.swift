@@ -9,7 +9,7 @@
 import UIKit
 import BDBOAuth1Manager
 
-class HomeTimelineViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, TweetsTableViewCellDelegate, TweetComposerViewControllerDelegate {
+class HomeTimelineViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, TweetsTableViewCellDelegate, TweetComposerViewControllerDelegate, TweetDetailsViewControllerDelegate {
 
     // MARK: - Properties
     // MARK: Outlets
@@ -32,7 +32,10 @@ class HomeTimelineViewController: UIViewController, UITableViewDelegate, UITable
         static let PopupAlertDefaultMessage = "Could not fetch your Tweets!"
         static let CGRectTableTop = CGPoint(x: 0, y: -64)
         static let BarButtonItemTextSize = CGFloat(17)
+        static let FetchMoreDataDiffThreshold = 5 // table will fetch more results from API if the difference between index of displaying cell and current count of tweets in timeline is less than this number
     }
+
+    var canFetchMoreResults = true
 
     // MARK: - View Lifecycle Methods
     override func viewDidLoad() {
@@ -45,7 +48,7 @@ class HomeTimelineViewController: UIViewController, UITableViewDelegate, UITable
 
         setupTableView()
 
-        updateUserTweets()
+        updateUserTweets(nil, withOrder: nil)
 
         // customize nav bar // not working
         if let font = UIFont(name: "tfontastic", size: ViewConfigParameters.BarButtonItemTextSize) {
@@ -71,6 +74,11 @@ class HomeTimelineViewController: UIViewController, UITableViewDelegate, UITable
         homeTimelineTableView.deselectRowAtIndexPath(indexPath, animated: true)
     }
 
+    func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
+        if (currentUserTweets!.count - indexPath.row) < ViewConfigParameters.FetchMoreDataDiffThreshold && canFetchMoreResults {
+            updateUserTweets(currentUserTweets?.last?.id, withOrder: .Before)
+        }
+    }
     // MARK: - Tweet Cell view delegate methods
     func tweetCellFavoritedDidToggle(cell: TweetsTableViewCell, newValue: Bool) {
         let indexPath = homeTimelineTableView.indexPathForCell(cell)
@@ -106,10 +114,23 @@ class HomeTimelineViewController: UIViewController, UITableViewDelegate, UITable
             }
         }
     }
+
     // MARK: - TweetComposerVCDelegate methods
     func tweetComposerViewController(sender: UIViewController, didPostNewTweet tweet: Tweets) {
         currentUserTweets?.insert(tweet, atIndex: 0)
         homeTimelineTableView.reloadRowsAtIndexPaths([NSIndexPath(forRow: 0, inSection: 0)], withRowAnimation: UITableViewRowAnimation.Fade)
+    }
+
+    // MARK: - Tweet details view action delegate
+    func tweetDetails(sender: UIViewController, userDidUpdateTweet tweet: Tweets) {
+        // iterate through all the tweets and
+        for (index, userTweet) in currentUserTweets!.enumerate() {
+            if userTweet.id == tweet.id {
+                currentUserTweets?.replaceRange(index...index, with: [tweet])
+                homeTimelineTableView.reloadRowsAtIndexPaths([NSIndexPath(forRow: index, inSection: 0)], withRowAnimation: .None)
+                break
+            }
+        }
     }
 
     // MARK: - View Actions
@@ -118,12 +139,12 @@ class HomeTimelineViewController: UIViewController, UITableViewDelegate, UITable
     }
 
     func refresh(sender: AnyObject?) {
-        updateUserTweets()
+        updateUserTweets(nil, withOrder: nil)
     }
 
     @IBAction func barHomeButtonTapped(sender: UIButton) {
         homeTimelineTableView.setContentOffset(ViewConfigParameters.CGRectTableTop, animated:true)
-        updateUserTweets()
+        updateUserTweets(nil, withOrder: nil)
     }
 
     // MARK: - View helper methods
@@ -140,10 +161,22 @@ class HomeTimelineViewController: UIViewController, UITableViewDelegate, UITable
         homeTimelineTableView.addSubview(tweetsRefreshControl)
     }
 
-    private func updateUserTweets() {
-        Tweets.getCurrentUserTweetsWithCompletion{ (userTweets:[Tweets]?, error: NSError?) -> () in
+    private func updateUserTweets(id: Int?, withOrder order: HomeTimeLineFetchOrder?) {
+        Tweets.getCurrentUserTweetsWithCompletion(id, withOrder: order) { (userTweets:[Tweets]?, error: NSError?) -> () in
             if error == nil {
-                self.currentUserTweets = userTweets
+                if let order = order {
+                    switch order {
+                    case .Since:
+                        print("Sie")
+                    case .Before:
+                        if let lastItemIndex = self.currentUserTweets?.count, let newTweets = userTweets {
+                            let insertIndex = lastItemIndex - 1
+                            self.currentUserTweets?.last!.id == userTweets?.first?.id ? self.currentUserTweets?.replaceRange(insertIndex...insertIndex, with: newTweets) : ()
+                        }
+                    }
+                } else {
+                    self.currentUserTweets = userTweets
+                }
             } else {
                 self.displayInformationalAlertView(ViewConfigParameters.PopupAlertDefaultMessage)
             }
@@ -179,6 +212,12 @@ class HomeTimelineViewController: UIViewController, UITableViewDelegate, UITable
                 navVC.composingNewTweet = true
             }
             navVC.delegate = self
+        } else if let navVC = segue.destinationViewController as? TweetDetailsViewController {
+            if let cell = sender as? TweetsTableViewCell {
+                let indexPath = homeTimelineTableView.indexPathForCell(cell)
+                navVC.displayTweet = currentUserTweets?[(indexPath?.row)!]
+                navVC.delegate = self
+            }
         }
     }
 

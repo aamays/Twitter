@@ -27,6 +27,8 @@ class TweetComposerViewController: UIViewController, UITextViewDelegate, CLLocat
     @IBOutlet weak var toggleLocationButton: UIButton!
     @IBOutlet weak var addMediaButton: UIButton!
     @IBOutlet weak var bottomBarView: UIView!
+    @IBOutlet weak var topBarView: UIView!
+    @IBOutlet weak var placemarkLabel: UILabel!
 
     // Set up image view
     var mediaImageView = UIImageView()
@@ -60,7 +62,7 @@ class TweetComposerViewController: UIViewController, UITextViewDelegate, CLLocat
         }
     }
 
-    var delegate: TweetComposerViewControllerDelegate?
+    weak var delegate: TweetComposerViewControllerDelegate?
 
     var composingNewTweet: Bool!
 
@@ -68,16 +70,20 @@ class TweetComposerViewController: UIViewController, UITextViewDelegate, CLLocat
         didSet {
             var titleColor = UIColor.lightGrayColor()
             if tagLocation {
-                locationManager.startUpdatingLocation()
                 titleColor = AppConstants.Colors.LocationActivePinColor
+                if let devicePlaceMark = devicePlaceMark {
+                    placemarkLabel?.text = "\(devicePlaceMark.locality!), \(devicePlaceMark.administrativeArea!)"
+                    placemarkLabel.alpha = 1
+                }
             } else {
-                locationManager.stopUpdatingLocation()
                 deviceLocation = nil
+                placemarkLabel.alpha = 0
             }
             toggleLocationButton?.setTitleColor(titleColor, forState: .Normal)
         }
     }
 
+    var devicePlaceMark: CLPlacemark?
     var deviceLocation: CLLocation?
     let locationManager = CLLocationManager()
 
@@ -124,6 +130,7 @@ class TweetComposerViewController: UIViewController, UITextViewDelegate, CLLocat
     override func viewWillAppear(animated: Bool) {
         NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("keyboardWillShow:"), name:UIKeyboardWillShowNotification, object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("keyboardWillHide:"), name:UIKeyboardWillHideNotification, object: nil)
+        locationManager.startUpdatingLocation()
     }
 
     override func viewWillDisappear(animated: Bool) {
@@ -136,6 +143,18 @@ class TweetComposerViewController: UIViewController, UITextViewDelegate, CLLocat
         if let location = locations.first {
             deviceLocation = location
         }
+
+        CLGeocoder().reverseGeocodeLocation(manager.location!, completionHandler: {(placemarks, error) -> Void in
+            if let error = error {
+                print("Error: \(error.localizedDescription)")
+                return
+            }
+
+            // update location code
+            if let placemarks = placemarks {
+                self.devicePlaceMark = placemarks[0]
+            }
+        })
     }
 
     func locationManager(manager: CLLocationManager, didFailWithError error: NSError) {
@@ -258,6 +277,9 @@ class TweetComposerViewController: UIViewController, UITextViewDelegate, CLLocat
         if let userImageUrl = UserManager.CurrentUser?.profileRegularImageUrl {
             currentUserImageView.setImageWithURL(userImageUrl)
         }
+
+        topBarView.addBorderToViewAtPosition(.Bottom)
+        bottomBarView.addBorderToViewAtPosition(.Top)
     }
 
     private func updateUIWithTweetInfo() {
@@ -267,7 +289,7 @@ class TweetComposerViewController: UIViewController, UITextViewDelegate, CLLocat
         }
 
         if let screenName = tweet?.user?.stylizedScreenName {
-            postMessage = screenName
+            postMessage = "\(screenName) "
         }
     }
 
