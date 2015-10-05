@@ -35,5 +35,14 @@ Time spent: 25 hours
 
 ### Walkthrough
 
-![Video Walkthrough](...)
+![Video Walkthrough](TwitterDemo.gif)
 
+GIF created with [LiceCap](http://www.cockos.com/licecap/).
+
+#### Development/Testing environment
+
+* Operating System: Yosemite v10.10.4
+* Xcode v7.0
+* iOS v9.0
+* Devices
+ * iPhone 6 Simulator
