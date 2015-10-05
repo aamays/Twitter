@@ -47,6 +47,10 @@ GIF created with [LiceCap](http://www.cockos.com/licecap/).
  * Set <b>ConsumerKey</b> key's value to your app's Consumer Key
  * Set <b>ConsumerSecret</b> key's value to your app's Consmer Secret
  * Save the file
+* Twitter application Consumer Key and Secret by going to [Application Management Console](https://apps.twitter.com) and clicking <b>Create New App</b>
+ * After the creadentails are generated, you can get the credentials from <b>Keys and Access Tokens</b> tab
+  ![Keys and Access Tokens](Twitter/TwitterApplicationKeyAndSecret.png)
+
 
 #### Development/Testing environment
 
