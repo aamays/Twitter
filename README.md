@@ -41,15 +41,16 @@ GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
 #### Installation setup instructions
 
-* For app to work properly, you need to provide a valid <b>Consumer Key</b> and <b>Consmer Secret</b> to the app
-* To add <b>Consumer Key</b> and <b>Consmer Secret</b>,
+* For app to work properly, you need to provide a valid Twitter application <b>Consumer Key</b> and <b>Consmer Secret</b> to the app. They can be created by going to [Application Management Console](https://apps.twitter.com) and clicking <b>Create New App</b>
+ * After the creadentails are generated, you can get the credentials from <b>Keys and Access Tokens</b> tab
+  ![Keys and Access Tokens](Twitter/TwitterApplicationKeyAndSecret.png)
+* To add <b>Consumer Key</b> and <b>Consmer Secret</b> to the app, do following:
  * Open [CredentialsInfo.plist](https://github.com/aamays/Twitter/blob/master/Twitter/CredentialsInfo.plist) in Twitter folder
  * Set <b>ConsumerKey</b> key's value to your app's Consumer Key
  * Set <b>ConsumerSecret</b> key's value to your app's Consmer Secret
  * Save the file
-* Twitter application Consumer Key and Secret by going to [Application Management Console](https://apps.twitter.com) and clicking <b>Create New App</b>
- * After the creadentails are generated, you can get the credentials from <b>Keys and Access Tokens</b> tab
-  ![Keys and Access Tokens](Twitter/TwitterApplicationKeyAndSecret.png)
+
+
 
 
 #### Development/Testing environment
