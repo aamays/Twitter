@@ -16,15 +16,16 @@ extension UIImage {
 
 extension UIView {
     func addBorderToViewAtPosition(position: BorderPotion, color: UIColor = AppConstants.Colors.LightBorderColor, andThickness thickness: CGFloat = 1) {
-        let bottomBorder = CALayer()
+        let border = CALayer()
         switch position {
         case .Top:
-            bottomBorder.frame = CGRectMake(0, 0, self.frame.size.width, thickness)
+            border.frame = CGRectMake(0, 0, self.frame.size.width, thickness)
         case .Bottom:
-            bottomBorder.frame = CGRectMake(0, self.bounds.origin.y + self.bounds.height, self.frame.size.width, thickness)
+            border.frame = CGRectMake(0, self.bounds.height - thickness, self.frame.size.width, thickness)
+//            border.frame = CGRectMake(0, 40, self.frame.size.width, thickness)
         }
 
-        bottomBorder.backgroundColor = color.CGColor
-        self.layer.addSublayer(bottomBorder)
+        border.backgroundColor = color.CGColor
+        self.layer.addSublayer(border)
     }
 }

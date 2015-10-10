@@ -13,7 +13,6 @@ import BDBOAuth1Manager
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-    var  storyboard = UIStoryboard(name: "Main", bundle: nil)
 
     func application(app: UIApplication, openURL url: NSURL, options: [String : AnyObject]) -> Bool {
 
@@ -29,15 +28,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         if let archivedUser = TwitterUser.getUserFromArchive() {
             UserManager.CurrentUser = archivedUser
-            // directly go to the home time line
-            if let homeTimelineNavVC = storyboard.instantiateViewControllerWithIdentifier(AppConstants.MainStoryboard.HomeTimelineNavVCIdentifier) as? UINavigationController {
-                if let homeTimelineVC = homeTimelineNavVC.topViewController as? HomeTimelineViewController {
-                    homeTimelineVC.currentUser = archivedUser
-                }
-                window?.rootViewController = homeTimelineNavVC
+            // load manager VC with menu controller
+            let menuVC = MainStoryboard.Storyboard.instantiateViewControllerWithIdentifier(MainStoryboard.MenuVCIdentifier) as? MenuViewController
+            if let managerVC = MainStoryboard.Storyboard.instantiateViewControllerWithIdentifier(MainStoryboard.ManagerVCIdentifier) as? VCMangerViewController {
+                managerVC.menuViewController = menuVC
+                managerVC.contentViewController = menuVC?.initialViewController
+                menuVC?.delegate = managerVC
+                window?.rootViewController = managerVC
             }
         }
 
+        UIApplication.sharedApplication().statusBarStyle = .LightContent
         return true
     }
 
@@ -50,6 +51,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
         // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
         NSNotificationCenter.defaultCenter().removeObserver(self, name: AppConstants.UserDidLogoutNotification, object: nil)
+        UIApplication.sharedApplication().statusBarStyle = .Default
     }
 
     func applicationWillEnterForeground(application: UIApplication) {
@@ -68,7 +70,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     // MARK: - Selector methods
     func currentUserDidLogout(sender: AnyObject?) {
-        let loginVC = storyboard.instantiateInitialViewController()
+        let loginVC = MainStoryboard.Storyboard.instantiateInitialViewController()
         window?.rootViewController = loginVC
     }
 }

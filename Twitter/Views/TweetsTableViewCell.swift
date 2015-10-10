@@ -13,6 +13,7 @@ import AFNetworking
     optional func tweetCellFavoritedDidToggle(cell: TweetsTableViewCell, newValue: Bool)
     optional func tweetCellRetweetDidToggle(cell: TweetsTableViewCell, newValue: Bool)
     optional func tweetCellDeleteStatus(cell: TweetsTableViewCell, withId id: Int)
+    optional func tweetCellUserProfileImageTapped(cell: TweetsTableViewCell, forTwitterUser user: TwitterUser?)
 }
 
 class TweetsTableViewCell: UITableViewCell {
@@ -47,6 +48,7 @@ class TweetsTableViewCell: UITableViewCell {
             replyButton?.tag = cellIndex!
             favoriteTweetButton?.tag = cellIndex!
             deleteTweetButton?.tag = cellIndex!
+            userProfileImageView?.tag = cellIndex!
         }
     }
 
@@ -71,6 +73,10 @@ class TweetsTableViewCell: UITableViewCell {
         userProfileImageView.layer.cornerRadius = 5
         userProfileImageView.clipsToBounds = true
 
+        // add gesture recognizer
+        let tapGestureRecognizer = UITapGestureRecognizer()
+        tapGestureRecognizer.addTarget(self, action: "imageViewTapped:")
+        userProfileImageView.addGestureRecognizer(tapGestureRecognizer)
     }
 
     // MARK: - View actions
@@ -90,6 +96,10 @@ class TweetsTableViewCell: UITableViewCell {
 
     @IBAction func deleteTweetButton(sender: UIButton) {
         delegate?.tweetCellDeleteStatus?(self, withId: tweet.id!)
+    }
+
+    func imageViewTapped(sender: AnyObject) {
+        delegate?.tweetCellUserProfileImageTapped?(self, forTwitterUser: tweet.user)
     }
 
     // MARK: - Helper methods
@@ -124,5 +134,6 @@ class TweetsTableViewCell: UITableViewCell {
         let iconColor = (userStatus ?? false) ? activeColor : UIColor.darkGrayColor()
         return AppUtils.getAttributedStringForActionButtons(countString, icon: iconType, iconTextColor: iconColor, andBaseLine: baseLineOffset)
     }
+
 
 }

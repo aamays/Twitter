@@ -9,18 +9,21 @@
 import UIKit
 import BDBOAuth1Manager
 
-class HomeTimelineViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, TweetsTableViewCellDelegate, TweetComposerViewControllerDelegate, TweetDetailsViewControllerDelegate {
+class TimelineViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, TweetsTableViewCellDelegate, TweetComposerViewControllerDelegate, TweetDetailsViewControllerDelegate {
 
     // MARK: - Properties
     // MARK: Outlets
     @IBOutlet weak var homeTimelineTableView: UITableView!
 
+
     // MARK: Others
+    var timelineType: TimelineType = .Home
     var currentUser: TwitterUser!
 
     var currentUserTweets: [Tweets]? {
         didSet {
             updateTableView()
+            fetchRetweetIdsForTweets()
         }
     }
 
@@ -75,10 +78,11 @@ class HomeTimelineViewController: UIViewController, UITableViewDelegate, UITable
     }
 
     func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
-        if (currentUserTweets!.count - indexPath.row) < ViewConfigParameters.FetchMoreDataDiffThreshold && canFetchMoreResults {
+        if (currentUserTweets!.count - indexPath.row) == ViewConfigParameters.FetchMoreDataDiffThreshold && canFetchMoreResults {
             updateUserTweets(currentUserTweets?.last?.id, withOrder: .Before)
         }
     }
+
     // MARK: - Tweet Cell view delegate methods
     func tweetCellFavoritedDidToggle(cell: TweetsTableViewCell, newValue: Bool) {
         let indexPath = homeTimelineTableView.indexPathForCell(cell)
@@ -112,6 +116,14 @@ class HomeTimelineViewController: UIViewController, UITableViewDelegate, UITable
             UserManager.deleteStatusWithId(tweet.id!) { (success, error) -> () in
                 // @todo: handle error cases here
             }
+        }
+    }
+
+    func tweetCellUserProfileImageTapped(cell: TweetsTableViewCell, forTwitterUser user: TwitterUser?) {
+
+        if let userProfileVC = MainStoryboard.Storyboard.instantiateViewControllerWithIdentifier(MainStoryboard.UserProfileVCIdentifier) as? UserProfileViewController, let user = user {
+            userProfileVC.user = user
+            navigationController?.pushViewController(userProfileVC, animated: true)
         }
     }
 
@@ -162,12 +174,12 @@ class HomeTimelineViewController: UIViewController, UITableViewDelegate, UITable
     }
 
     private func updateUserTweets(id: Int?, withOrder order: HomeTimeLineFetchOrder?) {
-        Tweets.getCurrentUserTweetsWithCompletion(id, withOrder: order) { (userTweets:[Tweets]?, error: NSError?) -> () in
+        UserManager.fetchUserTimeline(timelineType, withStatusId: id, withOrder: order) { (userTweets:[Tweets]?, error: NSError?) -> () in
             if error == nil {
                 if let order = order {
                     switch order {
                     case .Since:
-                        print("Sie")
+                        print("@todo: Update fetch logic for .Since order")
                     case .Before:
                         if let lastItemIndex = self.currentUserTweets?.count, let newTweets = userTweets {
                             let insertIndex = lastItemIndex - 1
@@ -176,13 +188,6 @@ class HomeTimelineViewController: UIViewController, UITableViewDelegate, UITable
                     }
                 } else {
                     self.currentUserTweets = userTweets
-                }
-
-                // fetch retweet id if retweeted by user
-                for tweet in self.currentUserTweets! {
-                    if tweet.retweetId == nil && tweet.currentUserRetweeted! {
-                        tweet.updateRetweetId()
-                    }
                 }
             } else {
                 self.displayInformationalAlertView(ViewConfigParameters.PopupAlertDefaultMessage)
@@ -194,6 +199,17 @@ class HomeTimelineViewController: UIViewController, UITableViewDelegate, UITable
         homeTimelineTableView.reloadData()
         if tweetsRefreshControl.refreshing {
             tweetsRefreshControl.endRefreshing()
+        }
+    }
+
+    private func fetchRetweetIdsForTweets() {
+        // fetch retweet id if retweeted by user
+        if let currentTweets = currentUserTweets {
+            for tweet in currentTweets {
+                if tweet.retweetId == nil && tweet.currentUserRetweeted! {
+                    tweet.updateRetweetId()
+                }
+            }
         }
     }
 

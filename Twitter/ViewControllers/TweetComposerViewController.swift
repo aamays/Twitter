@@ -96,6 +96,7 @@ class TweetComposerViewController: UIViewController, UITextViewDelegate, CLLocat
             addMediaButton?.setTitleColor(titleColor, forState: .Normal)
         }
     }
+    var tweetMediaIds: [String]?
 
     struct ViewConstants {
         static let CharacterLimit = 140
@@ -125,6 +126,7 @@ class TweetComposerViewController: UIViewController, UITextViewDelegate, CLLocat
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
         locationManager.requestWhenInUseAuthorization()
+
     }
 
     override func viewWillAppear(animated: Bool) {
@@ -171,7 +173,8 @@ class TweetComposerViewController: UIViewController, UITextViewDelegate, CLLocat
     @IBAction func postTweetTapped(sender: UIButton) {
         tweetComposerTextView?.resignFirstResponder()
         let location = tagLocation ? deviceLocation : nil
-        UserManager.updateUserStatus(postMessage!, inResponseToStatusId: tweet?.id, andLocation: location) { (tweet, error) -> () in
+        let mediaIds = addMedia ? tweetMediaIds : nil
+        UserManager.updateUserStatus(postMessage!, inResponseToStatusId: tweet?.id, andLocation: location, andMediaIds: mediaIds) { (tweet, error) -> () in
             if let userTweet = tweet {
                 (self.composingNewTweet ?? true) ? self.delegate?.tweetComposerViewController?(self, didPostNewTweet: userTweet) : ()
             }
@@ -181,21 +184,29 @@ class TweetComposerViewController: UIViewController, UITextViewDelegate, CLLocat
 
     @IBAction func captureMediaButton(sender: UIButton) {
         addMedia = !addMedia
+
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: UIAlertControllerStyle.ActionSheet)
+
+        // Check if camera available
         if UIImagePickerController.isSourceTypeAvailable(.Camera) {
-            let alert = UIAlertController(title: nil, message: nil, preferredStyle: UIAlertControllerStyle.ActionSheet)
             alert.addAction(UIAlertAction(title: ViewConstants.CameraActionSheetText, style: .Default) { (action: UIAlertAction) -> Void in
                 self.presentPickerVCWithSourceType(.Camera)
             })
-            alert.addAction(UIAlertAction(title: ViewConstants.PhotoLibraryActionSheetText, style: .Default) { (action: UIAlertAction) -> Void in
-                self.presentPickerVCWithSourceType(.PhotoLibrary)
-            })
-            alert.addAction(UIAlertAction(title: ViewConstants.CameraRollActionSheetText, style: .Default) { (action: UIAlertAction) -> Void in
-                self.presentPickerVCWithSourceType(.SavedPhotosAlbum)
-            })
-            alert.addAction(UIAlertAction(title: ViewConstants.CancelActionSheetText, style: UIAlertActionStyle.Cancel, handler: nil))
-
-            self.presentViewController(alert, animated: true, completion: nil)
         }
+
+        // Add Photo library
+        alert.addAction(UIAlertAction(title: ViewConstants.PhotoLibraryActionSheetText, style: .Default) { (action: UIAlertAction) -> Void in
+            self.presentPickerVCWithSourceType(.PhotoLibrary)
+        })
+
+        // Add Camera roll
+        alert.addAction(UIAlertAction(title: ViewConstants.CameraRollActionSheetText, style: .Default) { (action: UIAlertAction) -> Void in
+            self.presentPickerVCWithSourceType(.SavedPhotosAlbum)
+        })
+        alert.addAction(UIAlertAction(title: ViewConstants.CancelActionSheetText, style: UIAlertActionStyle.Cancel, handler: nil))
+
+        self.presentViewController(alert, animated: true, completion: nil)
+
     }
 
     private func presentPickerVCWithSourceType(sourceType: UIImagePickerControllerSourceType) {
@@ -257,8 +268,10 @@ class TweetComposerViewController: UIViewController, UITextViewDelegate, CLLocat
         if let image = image {
             if let imageData = UIImagePNGRepresentation(image) {
                 UserManager.uploadMedia(imageData) { (uploadedMediaDetails: NSDictionary?, error: NSError?) -> () in
-                    print(uploadedMediaDetails)
-                    print(error)
+                    if let mediaIdString = uploadedMediaDetails?[TwitterClient.ResponseFields.Media.IdString] as? String {
+                        if self.tweetMediaIds == nil { self.tweetMediaIds = [String]() }
+                        self.tweetMediaIds?.append(mediaIdString)
+                    }
                 }
             }
         }

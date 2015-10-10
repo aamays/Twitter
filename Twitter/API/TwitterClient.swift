@@ -87,12 +87,22 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
             static let CurrentUserRetweet = "current_user_retweet"
             static let CurrentUserRetweetId = "id"
         }
+
+        struct Media {
+            static let Id = "media_id"
+            static let IdString = "media_id_string"
+        }
     }
 
     struct RequestFields {
+
+        // GET request for Home Timeline parameters
         static let StatusHomeTimelineCount = "count"
         static let StatusHomeTimelineMaxId = "max_id"
         static let ShowStatusIncludeMyTweet = "include_my_retweet"
+
+        // POST request for Status update
+        static let UpdateStatusMediaIds = "media_ids"
     }
 
     struct APIScheme {
@@ -103,6 +113,7 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
         static let OAuthAccessTokenEndpoint = "oauth/access_token"
         static let UserCredentialEndpoint = "1.1/account/verify_credentials.json"
         static let HomeTimelineEndpoint = "1.1/statuses/home_timeline.json"
+        static let MentionsTimelineEndpoint = "1.1/statuses/mentions_timeline.json"
         static let ShowStatusEndpoint = "1.1/statuses/show/:id.json"
         static let UpdateStatusEndpoint = "1.1/statuses/update.json"
         static let RetweetStatusEndpoint = "1.1/statuses/retweet/:id.json"
@@ -158,15 +169,22 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
         }
     }
 
-    static func fetchUserTweetsWithCompletion(id: Int?, withOrder order: HomeTimeLineFetchOrder?, completion: ArrayDataCompletionBlock?) {
+    static func fetchUserTimelineType(timelineType: TimelineType, withStatusId id: Int?, andOrder order: HomeTimeLineFetchOrder? , withCompletion completion: ArrayDataCompletionBlock?) {
         let parameters = NSMutableDictionary()
         parameters[RequestFields.StatusHomeTimelineCount] = FetchResultsCount
         if let id = id, let order = order {
             parameters[order.rawValue] = id
         }
 
-        print(parameters)
-        TwitterClient.SharedInstance.GET(APIScheme.HomeTimelineEndpoint, parameters: parameters, success: { (operation: AFHTTPRequestOperation!, response: AnyObject!) -> Void in
+        var endpoint: String
+        switch timelineType {
+        case .Home:
+            endpoint = APIScheme.HomeTimelineEndpoint
+        case .Mentions:
+            endpoint = APIScheme.MentionsTimelineEndpoint
+        }
+
+        TwitterClient.SharedInstance.GET(endpoint, parameters: parameters, success: { (operation: AFHTTPRequestOperation!, response: AnyObject!) -> Void in
             let userTweets =  response as? [NSDictionary]
             completion?(userTweets, nil)
             }) { (operation: AFHTTPRequestOperation!, error: NSError!) -> Void in
@@ -219,7 +237,7 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
         }
     }
 
-    static func updateStatus(status: String, inResponseToStatusId replyStatusId: Int?, andLocation location: CLLocation?, withCompletion completion: DictionaryDataCompletionBlock?) {
+    static func updateStatus(status: String, inResponseToStatusId replyStatusId: Int?, andLocation location: CLLocation?, andMediaIds mediaIds: [String]?, withCompletion completion: DictionaryDataCompletionBlock?) {
         let parameters = NSMutableDictionary()
         parameters["status"] = status
         if let replyStatusId = replyStatusId {
@@ -230,6 +248,10 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
             parameters["lat"] = currLocation.coordinate.latitude
             parameters["long"] = currLocation.coordinate.longitude
             parameters["display_coordinates"] = true
+        }
+
+        if let mediaIds = mediaIds {
+            parameters[RequestFields.UpdateStatusMediaIds] = mediaIds.joinWithSeparator(",")
         }
 
         TwitterClient.SharedInstance.POST(APIScheme.UpdateStatusEndpoint, parameters: parameters, success: { (operation: AFHTTPRequestOperation!, response: AnyObject!) -> Void in
@@ -247,7 +269,6 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
             data.appendPartWithFormData(media, name: "media")
             }, success: { (operation: AFHTTPRequestOperation!, response: AnyObject!) -> Void in
             let uploadResponse =  response as? NSDictionary
-            print(uploadResponse)
             completion?(uploadResponse, nil)
             }) { (operation: AFHTTPRequestOperation!, error: NSError!) -> Void in
                 print(error.localizedDescription)

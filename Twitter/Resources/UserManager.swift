@@ -46,8 +46,8 @@ class UserManager: NSObject {
         }
     }
 
-    class func updateUserStatus(status: String, inResponseToStatusId statusId: Int?, andLocation location: CLLocation?, withCompletion completion: (Tweets?, NSError?) -> ()) {
-        TwitterClient.updateStatus(status, inResponseToStatusId: statusId, andLocation: location) { (responseData: NSDictionary?, error: NSError?) -> () in
+    class func updateUserStatus(status: String, inResponseToStatusId statusId: Int?, andLocation location: CLLocation?, andMediaIds mediaIds: [String]?, withCompletion completion: (Tweets?, NSError?) -> ()) {
+        TwitterClient.updateStatus(status, inResponseToStatusId: statusId, andLocation: location, andMediaIds: mediaIds) { (responseData: NSDictionary?, error: NSError?) -> () in
             if let data =  responseData {
                 completion(Tweets(dictionary: data), nil)
             } else {
@@ -62,6 +62,22 @@ class UserManager: NSObject {
                 completion(true, nil)
             } else {
                 completion(false, error)
+            }
+        }
+    }
+
+    class func fetchUserTimeline(timelineType: TimelineType, withStatusId id: Int?, withOrder order: HomeTimeLineFetchOrder?, completion: ([Tweets]?, NSError?) -> ()) {
+
+        TwitterClient.fetchUserTimelineType(timelineType, withStatusId: id, andOrder: order) { (tweetsArray:[NSDictionary]?, error: NSError?) -> () in
+            if let tweetsArray = tweetsArray {
+                var currentUserTweets = [Tweets]()
+                for tweetInfoDict in tweetsArray {
+                    let tweet = Tweets(dictionary: tweetInfoDict)
+                    currentUserTweets.append(tweet)
+                }
+                completion(currentUserTweets, nil)
+            } else {
+                completion(nil, error)
             }
         }
     }

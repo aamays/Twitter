@@ -23,7 +23,6 @@ class TweetMeasuresViewCell: UITableViewCell {
         super.awakeFromNib()
         // Initialization code
         contentView.addBorderToViewAtPosition(.Bottom)
-        contentView.addBorderToViewAtPosition(.Top)
     }
 
     override func setSelected(selected: Bool, animated: Bool) {

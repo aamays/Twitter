@@ -8,7 +8,6 @@
 
 import Foundation
 import UIKit
-typealias FontasticIconType = FontasticIcons.Map
 
 struct AppUtils {
 

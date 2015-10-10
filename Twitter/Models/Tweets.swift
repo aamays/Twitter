@@ -103,19 +103,4 @@ class Tweets: NSObject {
         }
     }
 
-    // MARK: - Class type methods
-    class func getCurrentUserTweetsWithCompletion(id: Int?, withOrder order: HomeTimeLineFetchOrder?, completion: ([Tweets]?, NSError?) -> ()) {
-        TwitterClient.fetchUserTweetsWithCompletion(id, withOrder: order) { (tweetsArray:[NSDictionary]?, error: NSError?) -> () in
-            if let tweetsArray = tweetsArray {
-                var currentUserTweets = [Tweets]()
-                for tweetInfoDict in tweetsArray {
-                    let tweet = Tweets(dictionary: tweetInfoDict)
-                    currentUserTweets.append(tweet)
-                }
-                completion(currentUserTweets, nil)
-            } else {
-                completion(nil, error)
-            }
-        }
-    }
 }

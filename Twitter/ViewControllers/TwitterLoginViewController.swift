@@ -20,7 +20,6 @@ class TwitterLoginViewController: UIViewController {
         // Do any additional setup after loading the view.
     }
 
-
     // MARK: - View Actions
     @IBAction func loginButtonTapped(sender: UIButton) {
         UserManager.loginUserWithCompletion { (user: TwitterUser?, error: NSError?) -> Void in
@@ -29,10 +28,6 @@ class TwitterLoginViewController: UIViewController {
         }
     }
 
-    // MARK: - Internal Helper functions
-
-
-
     // MARK: - Navigation
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
@@ -40,7 +35,7 @@ class TwitterLoginViewController: UIViewController {
         // Get the new view controller using segue.destinationViewController.
         // Pass the selected object to the new view controller.
         if let homeTimelineNavVC = segue.destinationViewController as? UINavigationController {
-            if let homeTimelineVC = homeTimelineNavVC.topViewController as? HomeTimelineViewController {
+            if let homeTimelineVC = homeTimelineNavVC.topViewController as? TimelineViewController {
                 homeTimelineVC.currentUser = currentUser
             }
         }
