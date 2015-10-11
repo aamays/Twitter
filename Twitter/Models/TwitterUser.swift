@@ -29,6 +29,8 @@ class TwitterUser: NSObject, NSCoding {
         return nil
     }
 
+    var userDescription: String?
+
     var profileSmallImageUrl: NSURL?
     var profileRegularImageUrl: NSURL? {
         var profileSmallImgUrlString = profileSmallImageUrl?.absoluteString ?? ""
@@ -43,11 +45,18 @@ class TwitterUser: NSObject, NSCoding {
     var friendsCount: Int?
     var followerCount: Int?
     var followingCount: Int?
+    var statusCounts: Int?
 
     var notificationsCount: Int?
     var createdAt: NSDate?
 
     var isVerified = false
+
+    // theme color variables
+    var profileLinkColor: UIColor?
+    var profileSidebarBorderColor: UIColor?
+    var profileSidebarFillColor: UIColor?
+    var profileTextColor: UIColor?
 
     init(dictionary: NSDictionary) {
 
@@ -55,10 +64,12 @@ class TwitterUser: NSObject, NSCoding {
 
         name = dictionary[TwitterClient.ResponseFields.User.Name] as? String
         screenName = dictionary[TwitterClient.ResponseFields.User.SreenName] as? String
+        userDescription = dictionary[TwitterClient.ResponseFields.User.Description] as? String
         notificationsCount = dictionary[TwitterClient.ResponseFields.User.NotificationsCount] as? Int
         friendsCount = dictionary[TwitterClient.ResponseFields.User.FriendsCount] as? Int
         followerCount = dictionary[TwitterClient.ResponseFields.User.FollowerCount] as? Int
         followingCount = dictionary[TwitterClient.ResponseFields.User.FollowingCount] as? Int
+        statusCounts = dictionary[TwitterClient.ResponseFields.User.StatusesCount] as? Int
 
         if let profileImageUrl = dictionary[TwitterClient.ResponseFields.User.ProfileImageUrlStr] as? String {
             profileSmallImageUrl = NSURL(string: profileImageUrl)
@@ -76,6 +87,23 @@ class TwitterUser: NSObject, NSCoding {
         if let verified = dictionary[TwitterClient.ResponseFields.User.Verified] as? Bool {
             isVerified = verified
         }
+
+        // set colors
+        if let profileLinkColorHex = dictionary[TwitterClient.ResponseFields.User.ProfileLinkColor] as? String {
+            profileLinkColor = UIColor(colorCode: profileLinkColorHex, alpha: 1)
+        }
+
+        if let profileSidebarBorderColorHex = dictionary[TwitterClient.ResponseFields.User.ProfileSidebarBorderColor] as? String {
+            profileSidebarBorderColor = UIColor(colorCode: profileSidebarBorderColorHex, alpha: 1)
+        }
+
+        if let profileSidebarFillColorHex = dictionary[TwitterClient.ResponseFields.User.ProfileSidebarFillColor] as? String {
+            profileSidebarFillColor = UIColor(colorCode: profileSidebarFillColorHex, alpha: 1)
+        }
+
+        if let profileTextColorColorHex = dictionary[TwitterClient.ResponseFields.User.ProfileTextColor] as? String {
+            profileTextColor = UIColor(colorCode: profileTextColorColorHex, alpha: 1)
+        }
     }
 
     // MARK: - NSCoding methods
@@ -84,17 +112,25 @@ class TwitterUser: NSObject, NSCoding {
         userDetailsDictionary.setValue(aDecoder.decodeIntegerForKey(TwitterClient.ResponseFields.User.Id), forKey: TwitterClient.ResponseFields.User.Id)
         userDetailsDictionary.setValue(aDecoder.decodeObjectForKey(TwitterClient.ResponseFields.User.Name) as? String, forKey: TwitterClient.ResponseFields.User.Name)
         userDetailsDictionary.setValue(aDecoder.decodeObjectForKey(TwitterClient.ResponseFields.User.SreenName) as? String, forKey: TwitterClient.ResponseFields.User.SreenName)
+        userDetailsDictionary.setValue(aDecoder.decodeObjectForKey(TwitterClient.ResponseFields.User.Description) as? String, forKey: TwitterClient.ResponseFields.User.Description)
 
+        // user stats
         userDetailsDictionary.setValue(aDecoder.decodeIntegerForKey(TwitterClient.ResponseFields.User.FriendsCount), forKey: TwitterClient.ResponseFields.User.FriendsCount)
         userDetailsDictionary.setValue(aDecoder.decodeIntegerForKey(TwitterClient.ResponseFields.User.FollowerCount), forKey: TwitterClient.ResponseFields.User.FollowerCount)
         userDetailsDictionary.setValue(aDecoder.decodeIntegerForKey(TwitterClient.ResponseFields.User.FollowingCount), forKey: TwitterClient.ResponseFields.User.FollowingCount)
         userDetailsDictionary.setValue(aDecoder.decodeIntegerForKey(TwitterClient.ResponseFields.User.NotificationsCount), forKey: TwitterClient.ResponseFields.User.NotificationsCount)
+        userDetailsDictionary.setValue(aDecoder.decodeIntegerForKey(TwitterClient.ResponseFields.User.StatusesCount), forKey: TwitterClient.ResponseFields.User.StatusesCount)
 
         userDetailsDictionary.setValue(aDecoder.decodeObjectForKey(TwitterClient.ResponseFields.User.ProfileImageUrlStr) as? String, forKey: TwitterClient.ResponseFields.User.ProfileImageUrlStr)
         userDetailsDictionary.setValue(aDecoder.decodeObjectForKey(TwitterClient.ResponseFields.User.BannerImageUrlStr) as? String, forKey: TwitterClient.ResponseFields.User.BannerImageUrlStr)
 
         userDetailsDictionary.setValue(aDecoder.decodeObjectForKey(TwitterClient.ResponseFields.User.CreatedAt) as? String, forKey: TwitterClient.ResponseFields.User.CreatedAt)
 
+        // colors
+        userDetailsDictionary.setValue(aDecoder.decodeObjectForKey(TwitterClient.ResponseFields.User.ProfileLinkColor) as? UIColor, forKey: TwitterClient.ResponseFields.User.ProfileLinkColor)
+        userDetailsDictionary.setValue(aDecoder.decodeObjectForKey(TwitterClient.ResponseFields.User.ProfileSidebarBorderColor) as? UIColor, forKey: TwitterClient.ResponseFields.User.ProfileSidebarBorderColor)
+        userDetailsDictionary.setValue(aDecoder.decodeObjectForKey(TwitterClient.ResponseFields.User.ProfileSidebarFillColor) as? UIColor, forKey: TwitterClient.ResponseFields.User.ProfileSidebarFillColor)
+        userDetailsDictionary.setValue(aDecoder.decodeObjectForKey(TwitterClient.ResponseFields.User.ProfileTextColor) as? UIColor, forKey: TwitterClient.ResponseFields.User.ProfileTextColor)
         self.init(dictionary: userDetailsDictionary)
     }
 
@@ -103,16 +139,23 @@ class TwitterUser: NSObject, NSCoding {
         aCoder.encodeInteger(id, forKey: TwitterClient.ResponseFields.User.Id)
         aCoder.encodeObject(name, forKey: TwitterClient.ResponseFields.User.Name)
         aCoder.encodeObject(screenName, forKey: TwitterClient.ResponseFields.User.SreenName)
+        aCoder.encodeObject(userDescription, forKey: TwitterClient.ResponseFields.User.Description)
         aCoder.encodeInteger(friendsCount!, forKey: TwitterClient.ResponseFields.User.FriendsCount)
         aCoder.encodeInteger(followerCount!, forKey: TwitterClient.ResponseFields.User.FollowerCount)
         aCoder.encodeInteger(followingCount!, forKey: TwitterClient.ResponseFields.User.FollowingCount)
         aCoder.encodeInteger(notificationsCount!, forKey: TwitterClient.ResponseFields.User.NotificationsCount)
+        aCoder.encodeInteger(statusCounts!, forKey: TwitterClient.ResponseFields.User.StatusesCount)
 
         aCoder.encodeObject(profileSmallImageUrl?.absoluteString, forKey: TwitterClient.ResponseFields.User.ProfileImageUrlStr)
         aCoder.encodeObject(profileBannerUrl?.absoluteString, forKey: TwitterClient.ResponseFields.User.BannerImageUrlStr)
 
         DateUtils.DateFormatter.dateFormat = DateUtils.TwitterApiResponseDateFormat
         aCoder.encodeObject(DateUtils.DateFormatter.stringFromDate(createdAt!), forKey: TwitterClient.ResponseFields.User.CreatedAt)
+
+        aCoder.encodeObject(profileLinkColor, forKey: TwitterClient.ResponseFields.User.ProfileLinkColor)
+        aCoder.encodeObject(profileSidebarBorderColor, forKey: TwitterClient.ResponseFields.User.ProfileSidebarBorderColor)
+        aCoder.encodeObject(profileSidebarFillColor, forKey: TwitterClient.ResponseFields.User.ProfileSidebarFillColor)
+        aCoder.encodeObject(profileTextColor, forKey: TwitterClient.ResponseFields.User.ProfileTextColor)
     }
 
     // MARK: - Class Type methods

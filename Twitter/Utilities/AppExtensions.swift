@@ -32,26 +32,17 @@ extension UIView {
     }
 }
 
+extension UIColor {
+    convenience init(colorCode: String, alpha: CGFloat) {
+        let scanner = NSScanner(string:colorCode)
+        var color: UInt32 = 0
+        scanner.scanHexInt(&color)
 
-extension UIImageView {
-    
-    func setFilteredImageFromUrlRequest(urlRequest: NSURLRequest, withFilter filter: CIFilter, andContext context: CIContext, placeholderImage: UIImage?, success: ((NSURLRequest, NSHTTPURLResponse, UIImage) -> Void)?, failure: ((NSURLRequest, NSHTTPURLResponse, NSError) -> Void)?) -> Void {
-        self.setImageWithURLRequest(urlRequest, placeholderImage: nil, success: { (request, response, bannerImage) -> Void in
-            let inputImage = CIImage(image: bannerImage)
-            filter.setValue(inputImage, forKey:"inputImage")
-            if let filteredImage = filter.outputImage, let imageExtent = inputImage?.extent {
-                let cgImage = context.createCGImage(filteredImage, fromRect: imageExtent)
-                self.image = UIImage(CGImage: cgImage)
-            } else {
-                self.image = bannerImage
-            }
-            
-            
-            success?(request, response, bannerImage)
-            }) { (request, response, error) -> Void in
-                // @todo: Handle error case
-                failure?(request, response, error)
-        }
+        let mask = 0x000000FF
+        let r = CGFloat(Float(Int(color >> 16) & mask)/255.0)
+        let g = CGFloat(Float(Int(color >> 8) & mask)/255.0)
+        let b = CGFloat(Float(Int(color) & mask)/255.0)
+
+        self.init(red: r, green: g, blue: b, alpha: alpha)
     }
-    
 }

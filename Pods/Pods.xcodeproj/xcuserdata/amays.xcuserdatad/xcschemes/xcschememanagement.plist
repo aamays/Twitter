@@ -14,6 +14,11 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
+		<key>FXBlurView.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>Pods.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -22,17 +27,22 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>0A3A54BDDA7BE3F61BE51EE7EFD03241</key>
+		<key>695969839880EC157BA2D0306921DD97</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>10E371F76051324258E089EE0DDFC2AA</key>
+		<key>9DFDB7F94081F014E774631EB9685A46</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>2946E41DF73BD98B5561968DEE86633E</key>
+		<key>CD70F1FBC874588C552B21244C5012B2</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>FEF059C9879A666112F80402C8D8C907</key>
 		<dict>
 			<key>primary</key>
 			<true/>

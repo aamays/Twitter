@@ -15,6 +15,14 @@ enum TweetDetailsViewCell: String {
     case TweetAndOwnerViewCell, TweetMediaViewCell, TweetTimeStampViewCell, TweetMeasuresViewCell, UserActionViewCell, TweetRepliesViewCell
 }
 
+enum UserProfileTableCell: String {
+    case UserProfileViewCell, ProfileSummaryViewCell
+}
+
+enum MenuViewCellType: String {
+    case MenuProfileViewCell, MenuOptionViewCell
+}
+
 enum TwitterMediaTypes: String {
     case photo
 }
@@ -27,14 +35,11 @@ enum TweetMeasures {
     case Retweet, Favorite
 }
 
-enum MenuViewCellType: String {
-    case MenuProfileViewCell, MenuOptionViewCell
-}
-
 
 enum TimelineType {
     case Home, Mentions
 }
+
 
 struct FontasticIcons {
     static let FontName = "tfontastic"

@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "DEEDEE5580F55D6AB5478C13"
-               BuildableName = "BDBOAuth1Manager.framework"
-               BlueprintName = "BDBOAuth1Manager"
+               BlueprintIdentifier = "2E03C30C62B3F5BBF1B340FF"
+               BuildableName = "FXBlurView.framework"
+               BlueprintName = "FXBlurView"
                ReferencedContainer = "container:Pods.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>

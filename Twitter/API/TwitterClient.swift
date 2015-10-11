@@ -48,12 +48,18 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
             static let SreenName = "screen_name"
             static let ProfileImageUrlStr = "profile_image_url_https"
             static let BannerImageUrlStr = "profile_banner_url"
+            static let StatusesCount = "statuses_count"
             static let FriendsCount = "friends_count"
             static let FollowerCount = "followers_count"
             static let FollowingCount = "following"
             static let NotificationsCount = "notifications"
             static let CreatedAt = "created_at"
             static let Verified = "verified"
+            static let Description = "description"
+            static let ProfileLinkColor = "profile_link_color"
+            static let ProfileSidebarBorderColor = "profile_sidebar_border_color"
+            static let ProfileSidebarFillColor = "profile_sidebar_fill_color"
+            static let ProfileTextColor = "profile_text_color"
         }
 
         struct Tweet {

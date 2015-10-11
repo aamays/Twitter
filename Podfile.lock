@@ -23,13 +23,16 @@ PODS:
   - BDBOAuth1Manager (1.5.0):
     - AFNetworking/NSURLConnection (~> 2.5.0)
     - AFNetworking/NSURLSession (~> 2.5.0)
+  - FXBlurView (1.6.4)
 
 DEPENDENCIES:
   - AFNetworking
   - BDBOAuth1Manager
+  - FXBlurView
 
 SPEC CHECKSUMS:
   AFNetworking: 05edc0ac4c4c8cf57bcf4b84be5b0744b6d8e71e
   BDBOAuth1Manager: 2e28773b58f880fb36b5cd3efcf0b1fefbc78a99
+  FXBlurView: db786c2561cb49a09ae98407f52460096ab8a44f
 
 COCOAPODS: 0.38.2
