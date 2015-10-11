@@ -11,6 +11,7 @@ import UIKit
 class UserProfileViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
 
     @IBOutlet weak var userProfileTableView: UITableView!
+    @IBOutlet weak var uiNavBackButton: UIButton!
 
     struct ViewConstants {
         static let EstimatedRowHeight: CGFloat = 100
@@ -25,10 +26,12 @@ class UserProfileViewController: UIViewController, UITableViewDelegate, UITableV
         setupTableView()
 
         title = ViewConstants.DefaultViewTitle
+        uiNavBackButton.alpha = navigationController != nil ? 1 : 0
     }
 
     var origEdgesForExtendedLayoutValue: UIRectEdge!
 
+    // MARK: View Lifecycle methods
     override func viewWillAppear(animated: Bool) {
         origEdgesForExtendedLayoutValue = edgesForExtendedLayout
         navigationController?.navigationBarHidden = true
@@ -58,6 +61,7 @@ class UserProfileViewController: UIViewController, UITableViewDelegate, UITableV
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         userProfileTableView.deselectRowAtIndexPath(indexPath, animated: true)
     }
+
 
     // MARK: - Helper methods
     private func setupTableView() {

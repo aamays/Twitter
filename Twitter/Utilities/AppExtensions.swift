@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import Foundation
+import AFNetworking
 
 extension UIImage {
     var aspectRatio: CGFloat {
@@ -28,4 +30,28 @@ extension UIView {
         border.backgroundColor = color.CGColor
         self.layer.addSublayer(border)
     }
+}
+
+
+extension UIImageView {
+    
+    func setFilteredImageFromUrlRequest(urlRequest: NSURLRequest, withFilter filter: CIFilter, andContext context: CIContext, placeholderImage: UIImage?, success: ((NSURLRequest, NSHTTPURLResponse, UIImage) -> Void)?, failure: ((NSURLRequest, NSHTTPURLResponse, NSError) -> Void)?) -> Void {
+        self.setImageWithURLRequest(urlRequest, placeholderImage: nil, success: { (request, response, bannerImage) -> Void in
+            let inputImage = CIImage(image: bannerImage)
+            filter.setValue(inputImage, forKey:"inputImage")
+            if let filteredImage = filter.outputImage, let imageExtent = inputImage?.extent {
+                let cgImage = context.createCGImage(filteredImage, fromRect: imageExtent)
+                self.image = UIImage(CGImage: cgImage)
+            } else {
+                self.image = bannerImage
+            }
+            
+            
+            success?(request, response, bannerImage)
+            }) { (request, response, error) -> Void in
+                // @todo: Handle error case
+                failure?(request, response, error)
+        }
+    }
+    
 }
