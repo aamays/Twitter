@@ -1,6 +1,6 @@
 ## Twitter Redux
 
-Time spent: `<Number of hours spent>`
+Time spent: 20 hrs
 
 ### Features
 
@@ -30,7 +30,7 @@ Time spent: `<Number of hours spent>`
 
 ### Walkthrough
 
-![Video Walkthrough](TwitterDemo2.gif)
+![Video Walkthrough](TwitterReduxDemo.gif)
 
 GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
