@@ -16,8 +16,8 @@ struct AppUtils {
         return userDir[0]
     }
 
-    static func getUserInfoArchiveFilePath() -> String {
-        return "\(AppUtils.getUserDirectory())/\(AppConstants.UserInfoArchiveFilename)"
+    static func getUserInfoArchiveFilePathForUserId(id: Int) -> String {
+        return "\(AppUtils.getUserDirectory())/\(id)"
     }
 
     static func updateTextAndTintColorForNavBar(navController: UINavigationController, tintColor: UIColor?, textColor: UIColor?) {

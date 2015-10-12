@@ -34,6 +34,13 @@ class VCMangerViewController: UIViewController, MenuViewControllerDelegate {
     struct ViewConstants {
         static let ContentViewSlideAnimationDuration = 0.2
     }
+
+    enum MenuState: CGFloat {
+        case Closed = 0, Open = 100 // these constants are used for position content view (by setting contentViewLeftMarginConstraint)
+    }
+
+    var isMenuOpen = false
+
     // MARK: - View lifecycle method
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -43,8 +50,12 @@ class VCMangerViewController: UIViewController, MenuViewControllerDelegate {
         updateContentView(nil)
     }
 
-    enum MenuState: CGFloat {
-        case Closed = 0, Open = 100 // these constants are used for position content view (by setting contentViewLeftMarginConstraint)
+    override func viewWillAppear(animated: Bool) {
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "toggleMenu:", name: AppConstants.ToggleMenuNotification, object: nil)
+    }
+
+    override func viewWillDisappear(animated: Bool) {
+        NSNotificationCenter.defaultCenter().removeObserver(self, name: AppConstants.ToggleMenuNotification, object: nil)
     }
 
     // MARK: - View Action methods
@@ -54,10 +65,11 @@ class VCMangerViewController: UIViewController, MenuViewControllerDelegate {
 
         if sender.state == UIGestureRecognizerState.Began {
             originalLeftMargin = contentViewLeftMarginConstraint.constant
+            self.menuView.alpha = 1
         } else if sender.state == UIGestureRecognizerState.Changed {
             contentViewLeftMarginConstraint.constant = max(min(originalLeftMargin + translation.x, self.view.bounds.width - MenuState.Open.rawValue), 0)
         } else if sender.state == UIGestureRecognizerState.Ended {
-            (velocity.x < 0) ? closeMenu(ViewConstants.ContentViewSlideAnimationDuration) : openMenu(ViewConstants.ContentViewSlideAnimationDuration)
+            (velocity.x < 0) ? closeMenu() : openMenu()
         }
     }
 
@@ -65,7 +77,7 @@ class VCMangerViewController: UIViewController, MenuViewControllerDelegate {
     func menuViewController(menuViewController: MenuViewController, didSelectedViewController selectedViewController: UIViewController) {
 
         // close the menu
-        closeMenu(ViewConstants.ContentViewSlideAnimationDuration)
+        closeMenu()
 
         // animate switch transition
         UIView.animateWithDuration(ViewConstants.ContentViewSlideAnimationDuration) { () -> Void in
@@ -106,17 +118,26 @@ class VCMangerViewController: UIViewController, MenuViewControllerDelegate {
         viewController.didMoveToParentViewController(self)
     }
 
-    private func openMenu(animateWithDuration: Double) {
+    func toggleMenu(sender: AnyObject?) {
+        isMenuOpen ? closeMenu() : openMenu()
+    }
+
+    private func openMenu(animateWithDuration: Double = ViewConstants.ContentViewSlideAnimationDuration) {
+        isMenuOpen = true
+        self.menuView.alpha = 1
         UIView.animateWithDuration(animateWithDuration) { () -> Void in
             self.contentViewLeftMarginConstraint.constant = self.view.bounds.width - MenuState.Open.rawValue
             self.view.layoutIfNeeded()
         }
     }
 
-    private func closeMenu(animateWithDuration: Double) {
-        UIView.animateWithDuration(animateWithDuration) { () -> Void in
+    private func closeMenu(animateWithDuration: Double = ViewConstants.ContentViewSlideAnimationDuration) {
+        isMenuOpen = false
+        UIView.animateWithDuration(animateWithDuration, animations: { () -> Void in
             self.contentViewLeftMarginConstraint.constant = MenuState.Closed.rawValue
             self.view.layoutIfNeeded()
+            }) { (status: Bool) -> Void in
+            self.menuView.alpha = 0
         }
     }
 

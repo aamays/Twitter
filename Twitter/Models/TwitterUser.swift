@@ -16,6 +16,7 @@
 //    "screen_name" = "_asinghal";
 //    "created_at" = "Tue Sep 29 06:27:41 +0000 2015";
 import UIKit
+import BDBOAuth1Manager
 
 class TwitterUser: NSObject, NSCoding {
 
@@ -58,7 +59,15 @@ class TwitterUser: NSObject, NSCoding {
     var profileSidebarFillColor: UIColor?
     var profileTextColor: UIColor?
 
-    init(dictionary: NSDictionary) {
+    // user access token (only applicable for logged in users and not the tweet user)
+    var accessToken: BDBOAuth1Credential?
+    static let AccessTokenArchiveKey = "access_token"
+
+    // check user state
+    var hasActiveSession = false
+    static let HasActiveSessionArchiveKey = "has_active_session"
+
+    init(dictionary: NSDictionary, accessToken token: BDBOAuth1Credential? = nil, isActive active: Bool = false) {
 
         id = dictionary[TwitterClient.ResponseFields.User.Id] as! Int
 
@@ -104,6 +113,10 @@ class TwitterUser: NSObject, NSCoding {
         if let profileTextColorColorHex = dictionary[TwitterClient.ResponseFields.User.ProfileTextColor] as? String {
             profileTextColor = UIColor(colorCode: profileTextColorColorHex, alpha: 1)
         }
+
+        accessToken = token
+
+        hasActiveSession = active
     }
 
     // MARK: - NSCoding methods
@@ -131,7 +144,11 @@ class TwitterUser: NSObject, NSCoding {
         userDetailsDictionary.setValue(aDecoder.decodeObjectForKey(TwitterClient.ResponseFields.User.ProfileSidebarBorderColor) as? UIColor, forKey: TwitterClient.ResponseFields.User.ProfileSidebarBorderColor)
         userDetailsDictionary.setValue(aDecoder.decodeObjectForKey(TwitterClient.ResponseFields.User.ProfileSidebarFillColor) as? UIColor, forKey: TwitterClient.ResponseFields.User.ProfileSidebarFillColor)
         userDetailsDictionary.setValue(aDecoder.decodeObjectForKey(TwitterClient.ResponseFields.User.ProfileTextColor) as? UIColor, forKey: TwitterClient.ResponseFields.User.ProfileTextColor)
-        self.init(dictionary: userDetailsDictionary)
+
+        let activeSession = aDecoder.decodeBoolForKey(TwitterUser.HasActiveSessionArchiveKey)
+
+        let token = aDecoder.decodeObjectForKey(TwitterUser.AccessTokenArchiveKey) as? BDBOAuth1Credential
+        self.init(dictionary: userDetailsDictionary, accessToken: token, isActive: activeSession)
     }
 
     func encodeWithCoder(aCoder: NSCoder) {
@@ -156,21 +173,23 @@ class TwitterUser: NSObject, NSCoding {
         aCoder.encodeObject(profileSidebarBorderColor, forKey: TwitterClient.ResponseFields.User.ProfileSidebarBorderColor)
         aCoder.encodeObject(profileSidebarFillColor, forKey: TwitterClient.ResponseFields.User.ProfileSidebarFillColor)
         aCoder.encodeObject(profileTextColor, forKey: TwitterClient.ResponseFields.User.ProfileTextColor)
+
+        // save access token
+        aCoder.encodeObject(accessToken, forKey: TwitterUser.AccessTokenArchiveKey)
+        aCoder.encodeBool(hasActiveSession, forKey: TwitterUser.HasActiveSessionArchiveKey)
     }
 
     // MARK: - Class Type methods
     class func archiveUser(user: TwitterUser) -> Bool {
-        return NSKeyedArchiver.archiveRootObject(user, toFile: AppUtils.getUserInfoArchiveFilePath())
+        return NSKeyedArchiver.archiveRootObject(user, toFile: AppUtils.getUserInfoArchiveFilePathForUserId(user.id))
     }
 
-    class func getUserFromArchive() -> TwitterUser? {
-        return NSKeyedUnarchiver.unarchiveObjectWithFile(AppUtils.getUserInfoArchiveFilePath()) as? TwitterUser
+    class func getUserFromArchiveWithId(id: Int) -> TwitterUser? {
+        return NSKeyedUnarchiver.unarchiveObjectWithFile(AppUtils.getUserInfoArchiveFilePathForUserId(id)) as? TwitterUser
     }
 
-    class func removetUserFromArchive() -> Bool {
-
-        if let _ = try? (NSFileManager.defaultManager().removeItemAtPath(AppUtils.getUserInfoArchiveFilePath())) { return true }
-        
+    class func removetUserFromArchiveWithId(id: Int) -> Bool {
+        if let _ = try? (NSFileManager.defaultManager().removeItemAtPath(AppUtils.getUserInfoArchiveFilePathForUserId(id))) { return true }
         return false
     }
 

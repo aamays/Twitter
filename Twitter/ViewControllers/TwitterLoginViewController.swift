@@ -11,8 +11,6 @@ import BDBOAuth1Manager
 
 class TwitterLoginViewController: UIViewController {
 
-    var currentUser: TwitterUser!
-
     // MARK: - Lifecycle methods
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -23,7 +21,6 @@ class TwitterLoginViewController: UIViewController {
     // MARK: - View Actions
     @IBAction func loginButtonTapped(sender: UIButton) {
         UserManager.loginUserWithCompletion { (user: TwitterUser?, error: NSError?) -> Void in
-            self.currentUser = user
             self.performSegueWithIdentifier(AppConstants.MainStoryboard.ShowHomeTimelineSegueIdentifier, sender: self)
         }
     }

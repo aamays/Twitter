@@ -138,10 +138,7 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
     static func initiateOAuthAccessRequestWithCompletion(completion: SuccessCompletionBlock?) {
 
         TwitterClient.SharedInstance.loginCompletition = completion
-
-        // clean up old access token
-        TwitterClient.SharedInstance.requestSerializer.removeAccessToken()
-        TwitterClient.ShareUploadInstace.requestSerializer.removeAccessToken()
+        TwitterClient.removeAccessToken()
 
         // Get a new token
         SharedInstance.fetchRequestTokenWithPath(APIScheme.OAuthRequestTokenEndpoint, method: "GET", callbackURL: AppConstants.OAuthCallbackUrl, scope: nil, success: { (authCredential: BDBOAuth1Credential!) -> Void in
@@ -155,14 +152,25 @@ class TwitterClient: BDBOAuth1RequestOperationManager {
 
     static func updateAccessTokenFromUrlQuery(query: String) {
         SharedInstance.fetchAccessTokenWithPath(APIScheme.OAuthAccessTokenEndpoint, method: "POST", requestToken: BDBOAuth1Credential(queryString: query), success: { (accessCredential: BDBOAuth1Credential!) -> Void in
-                TwitterClient.SharedInstance.requestSerializer.saveAccessToken(accessCredential)
-                TwitterClient.ShareUploadInstace.requestSerializer.saveAccessToken(accessCredential)
+                TwitterClient.updateAccessToken(accessCredential)
                 // Call the completion block with user here
                 TwitterClient.SharedInstance.loginCompletition?(true, nil)
             }) { (error) -> Void in
                 // Call the completion block with error here
                 TwitterClient.SharedInstance.loginCompletition?(false, error)
         }
+    }
+
+    static func updateAccessToken(token: BDBOAuth1Credential) {
+        TwitterClient.removeAccessToken()
+        TwitterClient.SharedInstance.requestSerializer.saveAccessToken(token)
+        TwitterClient.ShareUploadInstace.requestSerializer.saveAccessToken(token)
+    }
+
+    static func removeAccessToken() {
+        // clean up old access token
+        TwitterClient.SharedInstance.requestSerializer.removeAccessToken()
+        TwitterClient.ShareUploadInstace.requestSerializer.removeAccessToken()
     }
 
     static func fetchUserCredentialsWithCompletion(completion: DictionaryDataCompletionBlock?) {

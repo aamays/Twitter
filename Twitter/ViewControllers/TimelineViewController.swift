@@ -146,8 +146,8 @@ class TimelineViewController: UIViewController, UITableViewDelegate, UITableView
     }
 
     // MARK: - View Actions
-    @IBAction func logoutButtonTapped(sender: UIButton) {
-        UserManager.logoutCurrentUser()
+    @IBAction func menuTapped(sender: UIButton) {
+        NSNotificationCenter.defaultCenter().postNotificationName(AppConstants.ToggleMenuNotification, object: sender)
     }
 
     func refresh(sender: AnyObject?) {
@@ -157,6 +157,10 @@ class TimelineViewController: UIViewController, UITableViewDelegate, UITableView
     @IBAction func barHomeButtonTapped(sender: UIButton) {
         homeTimelineTableView.setContentOffset(ViewConfigParameters.CGRectTableTop, animated:true)
         updateUserTweets(nil, withOrder: nil)
+    }
+
+    @IBAction func tabBarLongPressed(sender: UILongPressGestureRecognizer) {
+        performSegueWithIdentifier(MainStoryboard.SwitchAccountSegueIdentifier, sender: self)
     }
 
     // MARK: - View helper methods

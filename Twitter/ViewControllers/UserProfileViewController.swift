@@ -130,11 +130,8 @@ class UserProfileViewController: UIViewController, UITableViewDelegate, UITableV
 
     private func setupImageView() {
         if let bannerUrl = user.profileBannerUrl {
-            NSLog("made request")
             userProfileImageView.setImageWithURLRequest(NSURLRequest(URL: bannerUrl), placeholderImage: nil, success: { (request: NSURLRequest!, response: NSHTTPURLResponse!, bannerImage: UIImage!) -> Void in
-                    NSLog("got response")
                     self.userProfileImageView.image = bannerImage
-                    NSLog("making blurry")
                     self.blurredImageView?.image = bannerImage.blurredImageWithRadius(10, iterations: 20, tintColor: UIColor.clearColor())
                 }) { (request: NSURLRequest!, response: NSHTTPURLResponse!, error: NSError!) -> Void in
                     // @todo: Handle error case

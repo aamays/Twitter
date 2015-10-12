@@ -23,6 +23,10 @@ enum MenuViewCellType: String {
     case MenuProfileViewCell, MenuOptionViewCell
 }
 
+enum AccountManagerCell: String {
+    case UserAccountViewCell
+}
+
 enum TwitterMediaTypes: String {
     case photo
 }
@@ -76,6 +80,8 @@ typealias FontasticIconType = FontasticIcons.Map
 struct AppConstants {
     static let UserDidLoginNotification = "info.amays.UserDidLoginNotification"
     static let UserDidLogoutNotification = "info.amays.UserDidLogoutNotificationKey"
+    static let UserDidChangeNotification = "info.amays.UserDidChangeNotificationKey"
+    static let ToggleMenuNotification = "info.amays.ToggleMenuNotification"
 
     static let OAuthCallbackUrl = NSURL(string: "aktwitter://oauth")
 
@@ -85,8 +91,10 @@ struct AppConstants {
     static let ApplicationBarTintColor = UIColor.whiteColor()
 
     struct MainStoryboard {
+        // View Controller indentifier
         static let Storyboard = UIStoryboard(name: "Main", bundle: nil)
         static let ShowHomeTimelineSegueIdentifier = "Show Home Timeline"
+        static let ShowLoginSegueIdentifier = "Show Login"
         static let TimelineVCIdentifier = "TimelineViewController"
         static let TwitterLoginVCIdentifier = "TwitterLoginViewController"
         static let TimelineNavVCIdentifier = "TimelineNavigationViewController"
@@ -95,9 +103,13 @@ struct AppConstants {
         static let ManagerVCIdentifier = "VCMangerViewController"
         static let MenuVCIdentifier = "MenuViewController"
         static let ProfileVCIndetifier = "ProfileViewController"
+        static let AccountsManagerVCIdentifier = "AccountsManagerViewController"
+
+        // segue identifier
         static let ComposeReplySegueIdentifier = "Compose Reply"
         static let ShowFullImageSegueIdentifier = "Show Full Image"
         static let ComposeNewStatusSegueIndentifier = "Compose New Status"
+        static let SwitchAccountSegueIdentifier = "Swtich Accounts"
     }
 
     struct Colors {

@@ -12,19 +12,33 @@ import CoreLocation
 class UserManager: NSObject {
 
     static var CurrentUser: TwitterUser? {
-        didSet {
-            if let currentUser = CurrentUser {
-                TwitterUser.archiveUser(currentUser)
-                NSNotificationCenter.defaultCenter().postNotificationName(AppConstants.UserDidLoginNotification, object: nil)
-            } else {
-                // User is set to nil
-                // remove user data from persistence
-                TwitterUser.removetUserFromArchive()
+        didSet(PreviousUser) {
+
+            // check if previous user was not nil
+            if let prevUser = PreviousUser {
                 // clear session token
-                TwitterClient.SharedInstance.requestSerializer.removeAccessToken()
-                // send logout notification
-                NSNotificationCenter.defaultCenter().postNotificationName(AppConstants.UserDidLogoutNotification, object: nil)
+                TwitterClient.removeAccessToken()
+                // set user to inactive
+                prevUser.hasActiveSession = false
+
+                if let _ = CurrentUser {
+                    TwitterUser.archiveUser(prevUser)
+                } else {
+                    // User is set to nil
+                    // remove user data from persistence
+                    TwitterUser.removetUserFromArchiveWithId(prevUser.id)
+
+                }
             }
+
+            if let currentUser = CurrentUser {
+                currentUser.hasActiveSession = true
+                TwitterClient.updateAccessToken(currentUser.accessToken!)
+
+                // archive/re-archive user
+                TwitterUser.archiveUser(currentUser)
+            }
+
         }
     }
 
@@ -34,7 +48,7 @@ class UserManager: NSObject {
             if success {
                 TwitterClient.fetchUserCredentialsWithCompletion({ (responseData: NSDictionary?, error: NSError?) -> () in
                     if let userCredentails = responseData {
-                        UserManager.CurrentUser = TwitterUser(dictionary: userCredentails)
+                        UserManager.CurrentUser = TwitterUser(dictionary: userCredentails, accessToken: TwitterClient.SharedInstance.requestSerializer.accessToken, isActive: true)
                         completion?(UserManager.CurrentUser, nil)
                     } else {
                         completion?(nil, error)
@@ -90,6 +104,26 @@ class UserManager: NSObject {
                 completion(nil, error)
             }
         }
+    }
+
+    class func getLastActiveUser() -> TwitterUser? {
+        let activeUsers = getArchivedUsers().filter { $0.hasActiveSession }
+        return activeUsers.count > 0 ? activeUsers[0] : nil
+    }
+
+    class func getArchivedUsers() -> [TwitterUser] {
+        let filemanager:NSFileManager = NSFileManager()
+        let files = filemanager.enumeratorAtPath(AppUtils.getUserDirectory())
+        print(AppUtils.getUserDirectory())
+        var archivedUsers = [TwitterUser]()
+        while let fileName = files?.nextObject() as? String {
+            if let userId = Int(fileName) {
+                if let user = NSKeyedUnarchiver.unarchiveObjectWithFile(AppUtils.getUserInfoArchiveFilePathForUserId(userId)) as? TwitterUser {
+                    archivedUsers.append(user)
+                }
+            }
+        }
+        return archivedUsers
     }
 
     class func logoutCurrentUser() {

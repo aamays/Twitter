@@ -12,6 +12,7 @@ class MenuProfileViewCell: UITableViewCell {
 
     @IBOutlet weak var menuProfileImageView: UIImageView!
     @IBOutlet weak var menuProfileUserName: UILabel!
+    @IBOutlet weak var menuProfileScreenName: UILabel!
 
     var user: TwitterUser! {
         didSet {
@@ -40,6 +41,7 @@ class MenuProfileViewCell: UITableViewCell {
 
         // set name label
         menuProfileUserName.text = user.name
+        menuProfileScreenName.text = user.stylizedScreenName
     }
 
 }

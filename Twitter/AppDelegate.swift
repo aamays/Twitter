@@ -26,7 +26,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
 
-        if let archivedUser = TwitterUser.getUserFromArchive() {
+        if let archivedUser = UserManager.getLastActiveUser() {
             UserManager.CurrentUser = archivedUser
             // load manager VC with menu controller
             let menuVC = MainStoryboard.Storyboard.instantiateViewControllerWithIdentifier(MainStoryboard.MenuVCIdentifier) as? MenuViewController
