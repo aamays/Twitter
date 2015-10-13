@@ -102,7 +102,11 @@ class AccountsManagerViewController: UIViewController, UICollectionViewDelegate,
                 senderView.transform = ViewConstants.RemoveUserScaleDownTransform
                 }, completion: { (status: Bool) -> Void in
 
-                    UserManager.CurrentUser = nil
+                    let userToRemove = self.userAccounts[indexPath!.row]
+                    TwitterUser.removetUserFromArchiveWithId(userToRemove.id)
+                    if userToRemove.hasActiveSession {
+                        UserManager.CurrentUser = nil
+                    }
                     self.userAccounts.removeAtIndex(indexPath!.row)
 
                     if self.userAccounts.count == 0 {
